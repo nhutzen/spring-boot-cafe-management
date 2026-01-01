@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Admin',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/dashboard.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<!-- Main Content -->
+<main class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Admin Dashboard</h1>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Staff Management -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fas fa-users-cog"></i></div>
+                    <h5 class="card-title">Staff Management</h5>
+                    <p class="card-text">Add, edit, delete, and view the list of staff members.</p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/dashboard/staff}" class="stretched-link">
+                        Go to management
+                        <i class="fas fa-arrow-circle-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Management -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fas fa-coffee"></i></div>
+                    <h5 class="card-title">Product Management</h5>
+                    <p class="card-text">Manage all products and beverages on the menu.</p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/product/list}" class="stretched-link">
+                        Go to management
+                        <i class="fas fa-arrow-circle-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Management -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fas fa-sitemap"></i></div>
+                    <h5 class="card-title">Category Management</h5>
+                    <p class="card-text">Organize products into different categories.</p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/category/list}" class="stretched-link">
+                        Go to management
+                        <i class="fas fa-arrow-circle-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- BannerService Management -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fas fa-images"></i></div>
+                    <h5 class="card-title">Banner Management</h5>
+                    <p class="card-text">Manage promotional and event banners.</p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/dashboard/banners}" class="stretched-link">
+                        Go to management
+                        <i class="fas fa-arrow-circle-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voucher Management -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fas fa-ticket-alt"></i></div>
+                    <h5 class="card-title">Voucher Management</h5>
+                    <p class="card-text">Create and manage discount codes for customers.</p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/dashboard/vouchers/list}" class="stretched-link">
+                        Go to management
+                        <i class="fas fa-arrow-circle-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales View -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                    <h5 class="card-title">Sales View</h5>
+                    <p class="card-text">View statistics, reports, and export to Excel.</p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/dashboard/sales}" class="stretched-link">
+                        View reports
+                        <i class="fas fa-arrow-circle-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- .row -->
+</main>
+<div th:insert="~{layout/footer}"></div>
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

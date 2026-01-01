@@ -1,0 +1,293 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head th:replace="~{fragments/common :: common-head(-->
+<!--            pageTitle='Profile',-->
+<!--            pageSpecificCss=~{:: .page-css}-->
+<!--          )}"></head>-->
+<!--<th:block class="page-css">-->
+<!--    <link rel="stylesheet" href="/assets/css/dashboard/dashboard.css">-->
+<!--    <link rel="stylesheet" href="/assets/css/profile/edit.css">-->
+<!--</th:block>-->
+<!--<body>-->
+<!--<div th:replace="~{fragments/common :: navbar-main}"></div>-->
+<!--<div class="container py-5">-->
+<!--    <div class="row justify-content-center">-->
+<!--        <div class="col-lg-10 col-xl-8">-->
+
+<!--            <h1 class="text-center mb-4">Edit Profile</h1>-->
+<!--            <div class="card">-->
+<!--                <div class="card-body">-->
+<!--                    <form action="/profile/edit" enctype="multipart/form-data" method="post">-->
+<!--                        <div th:if="${errorMessage}">-->
+<!--                            <div class="alert alert-danger" role="alert" th:text="${errorMessage}">-->
+<!--                                This is an error message.-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; 2. Hidden fields &ndash;&gt;-->
+<!--                        <input name="cusId" th:value="${customer.cusId}" type="hidden">-->
+<!--                        <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>-->
+
+<!--                        &lt;!&ndash; 3. Avatar &ndash;&gt;-->
+<!--                        <div class="text-center mb-4">-->
+<!--                            <img th:if="${customer.googleAccount}"-->
+<!--                                 th:src="${customer.img}"-->
+<!--                                 alt="Avatar Google"-->
+<!--                                 class="profile-avatar mb-3"/>-->
+
+<!--                            <img th:unless="${customer.googleAccount}"-->
+<!--                                 th:src="@{/uploads/{img}(img=${customer.img})}"-->
+<!--                                 alt="Avatar"-->
+<!--                                 class="profile-avatar mb-3"/>-->
+<!--                        </div>-->
+
+<!--                        <div th:if="${!customer.googleAccount}">-->
+<!--                            <div class="mb-3">-->
+<!--                                <label for="imgFile" class="form-label">Change avatar:</label>-->
+<!--                                <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>-->
+<!--                                <input class="form-control" type="file" id="imgFile" name="imgFile" accept="image/*">-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        &lt;!&ndash; 4. Username &ndash;&gt;-->
+<!--                        <div class="mb-3">-->
+<!--                            <label class="form-label">Username:</label>-->
+
+<!--                            <input class="form-control" type="text" name="username"-->
+<!--                                   th:value="${customer.username}">-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; 5. Name &ndash;&gt;-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="nameInput" class="form-label">Name:</label>-->
+<!--                            <input class="form-control" type="text" id="nameInput" name="name"-->
+<!--                                   th:value="${customer.name}">-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; 6. Phone &ndash;&gt;-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="phoneInput" class="form-label">Phone number:</label>-->
+<!--                            <input class="form-control" type="text" id="phoneInput" name="phoneNumber"-->
+<!--                                   th:value="${customer.phoneNumber != null ? customer.phoneNumber : ''}">-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; 7. Email &ndash;&gt;-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="emailInput" class="form-label">Email:</label>-->
+<!--                            <input class="form-control" type="text" id="emailInput" name="email"-->
+<!--                                   th:readonly="${customer.googleAccount}"-->
+<!--                                   th:value="${customer.email}">-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; 8. DOB &ndash;&gt;-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="dobInput" class="form-label">Date of birth:</label>-->
+<!--                            <input class="form-control" type="date" id="dobInput" name="dateOfBirth"-->
+<!--                                   th:readonly="${!customer.googleAccount}"-->
+<!--                                   th:value="${#temporals.format(customer.dateOfBirth, 'yyyy-MM-dd')}">-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; 9. Nút bấm &ndash;&gt;-->
+<!--                        <div class="text-center mt-5 d-flex justify-content-center gap-3">-->
+<!--                            &lt;!&ndash; Nút "Edit" là nút chính -> .btn-primary &ndash;&gt;-->
+<!--                            <button class="btn btn-primary btn-lg" type="submit">-->
+<!--                                Save Changes-->
+<!--                            </button>-->
+
+<!--                            &lt;!&ndash; Nút "Cancel" là nút phụ -> .btn-outline-primary &ndash;&gt;-->
+<!--                            <a th:href="@{/profile}" class="btn btn-outline-primary btn-lg" type="button">-->
+<!--                                Cancel-->
+<!--                            </a>-->
+<!--                        </div>-->
+<!--                    </form>-->
+<!--                    &lt;!&ndash; Kết thúc Form &ndash;&gt;-->
+
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--<div th:insert="~{layout/footer}"></div>-->
+<!--&lt;!&ndash; Bootstrap 5 JS &ndash;&gt;-->
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"-->
+<!--        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"-->
+<!--        crossorigin="anonymous"></script>-->
+
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Profile',
+            pageSpecificCss=~{:: .page-css}
+          )}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/dashboard.css">
+    <link rel="stylesheet" href="/assets/css/profile/edit.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+
+            <h1 class="text-center mb-4">Edit Profile</h1>
+
+            <div id="reminder" th:text="${reminder}" style="display:none"></div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form action="/profile/edit" enctype="multipart/form-data" method="post">
+                        <div th:if="${errorMessage}">
+                            <div class="alert alert-danger" role="alert" th:text="${errorMessage}">
+                                This is an error message.
+                            </div>
+                        </div>
+
+                        <!-- 2. Hidden fields -->
+                        <input name="cusId" th:value="${customer.cusId}" type="hidden">
+                        <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+
+                        <!-- 3. Avatar -->
+                        <div class="text-center mb-4">
+                            <img th:if="${customer.googleAccount}"
+                                 th:src="${customer.img}"
+                                 alt="Avatar Google"
+                                 class="profile-avatar mb-3"/>
+
+                            <img th:unless="${customer.googleAccount}"
+                                 th:src="@{/uploads/{img}(img=${customer.img})}"
+                                 alt="Avatar"
+                                 class="profile-avatar mb-3"/>
+                        </div>
+
+                        <div th:if="${!customer.googleAccount}">
+                            <div class="mb-3">
+                                <label for="imgFile" class="form-label">Change avatar:</label>
+                                <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+                                <input class="form-control" type="file" id="imgFile" name="imgFile" accept="image/*">
+                            </div>
+                        </div>
+                        <!-- 4. Username -->
+                        <div class="mb-3">
+                            <label class="form-label">Username:</label>
+
+                            <input class="form-control" type="text" name="username"
+                                   th:value="${customer.username}">
+                        </div>
+                        <!-- 5. Name -->
+                        <div class="mb-3">
+                            <label for="nameInput" class="form-label">Name:</label>
+                            <input class="form-control" type="text" id="nameInput" name="name"
+                                   th:value="${customer.name}">
+                        </div>
+
+                        <!-- 6. Phone -->
+                        <div class="mb-3">
+                            <label for="phoneInput" class="form-label">Phone number:</label>
+                            <input class="form-control" type="text" id="phoneInput" name="phoneNumber"
+                                   th:value="${customer.phoneNumber != null ? customer.phoneNumber : ''}">
+                        </div>
+
+                        <!-- 7. Email -->
+                        <div class="mb-3">
+                            <label for="emailInput" class="form-label">Email:</label>
+                            <input class="form-control" type="text" id="emailInput" name="email"
+                                   th:readonly="${customer.googleAccount}"
+                                   th:value="${customer.email}">
+                        </div>
+
+                        <!-- 8. DOB -->
+                        <div class="mb-3">
+                            <label for="dobInput" class="form-label">Date of birth:</label>
+                            <input class="form-control" type="date" id="dobInput" name="dateOfBirth"
+                                   th:readonly="${customer.dateOfBirth != null}"
+                                   th:value="${#temporals.format(customer.dateOfBirth, 'yyyy-MM-dd')}">
+                        </div>
+
+                        <!-- 9. Nút bấm -->
+                        <div class="text-center mt-5 d-flex justify-content-center gap-3">
+                            <!-- Nút "Edit" là nút chính -> .btn-primary -->
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                Save Changes
+                            </button>
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="/profile" class="text-decoration-none"
+                               style="color: var(--brand-primary); font-weight: 500;">
+                                <i class="fa-solid fa-arrow-left me-1"></i>
+                                Back to Profile
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="welcomeModalLabel">Chào mừng bạn!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="welcomeMessage"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const msg = document.getElementById('reminder').textContent.trim();
+        if (msg !== '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Chào mừng bạn!',
+                text: msg,
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const msg = document.getElementById('reminder').textContent.trim();
+
+        if (msg !== '') {
+            document.getElementById('welcomeMessage').textContent = msg;
+
+            const modal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+            modal.show();
+        }
+    });
+</script>
+
+
+<div th:insert="~{layout/footer}"></div>
+
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Login',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/account/login.css">
+    <style>
+        /* == :root định nghĩa các biến màu chủ đạo == */
+        :root {
+            --color-primary: #FF7A00; /* Cam chủ đạo */
+            --color-primary-dark: #E06C00;
+            --color-danger: #dc3545;
+            --color-danger-dark: #b02a37;
+            --color-success: #198754;
+            --color-white: #FFFFFF;
+            --color-background: #f8f9fa;
+            --color-text-dark: #212529;
+            --color-text-muted: #6c757d;
+            --font-family-base: 'Inter', sans-serif;
+            --border-radius-base: 0.5rem; /* 8px */
+            --border-radius-lg: 0.75rem; /* 12px */
+            --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* == Style tổng thể == */
+        body {
+            font-family: var(--font-family-base);
+            background-color: var(--color-background);
+            color: var(--color-text-dark);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+        }
+
+        /* == Style cho Card (Thống nhất) == */
+        .card {
+            border: none;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-base);
+            height: 100%;
+        }
+
+        .card-header {
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+        }
+
+        .card-body {
+            padding: 2.5rem;
+        }
+
+        /* == STYLES CHO BUTTON (Thống nhất) == */
+        /* 1. Button chính (Màu cam) */
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: var(--color-white);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+            box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+        }
+
+        /* 2. Button phụ (Viền cam) */
+        .btn-outline-primary {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+        }
+
+        /* 3. Button Nguy hiểm (Viền đỏ) */
+        .btn-outline-danger {
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-danger:hover,
+        .btn-outline-danger:focus,
+        .btn-outline-danger:active {
+            background-color: var(--color-danger);
+            color: var(--color-white);
+        }
+
+        /* 4. Button Đỏ (Solid) */
+        .btn-danger {
+            background-color: var(--color-danger);
+            border-color: var(--color-danger);
+            color: var(--color-white);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--color-danger-dark);
+            border-color: var(--color-danger-dark);
+        }
+
+        /* 5. Nút Google (MỚI) */
+        .btn-outline-google {
+            border-color: #ced4da; /* Viền xám nhạt */
+            color: var(--color-text-dark);
+            font-weight: 500;
+            padding: 0.65rem 1.5rem; /* Padding thống nhất */
+            border-radius: var(--border-radius-base);
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-google:hover {
+            background-color: #f8f9fa; /* Nền xám siêu nhạt khi hover */
+            border-color: #adb5bd;
+        }
+
+        /* Style cho các nút nhỏ (sm) trong bảng */
+        .btn-sm.btn-outline-primary,
+        .btn-sm.btn-outline-danger {
+            padding: 0.25rem 0.75rem;
+            font-weight: 500;
+        }
+
+        /* == Style riêng cho Form (Thống nhất) == */
+        .form-label {
+            font-weight: 500;
+            color: var(--color-text-muted);
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--border-radius-base);
+            padding: 0.65rem 1rem; /* KÍCH THƯỚC CHUẨN */
+            border: 1px solid #ced4da;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+        }
+
+        .form-control[readonly] {
+            background-color: var(--color-background);
+            border-style: dashed;
+        }
+
+        /* == GHI ĐÈ MÀU BOOTSTRAP == */
+        .bg-primary {
+            background-color: var(--color-primary) !important;
+            border-color: var(--color-primary) !important;
+        }
+
+        .text-primary {
+            color: var(--color-primary) !important;
+        }
+
+        .modal-header.bg-danger,
+        .modal-header.bg-success {
+            color: var(--color-white);
+        }
+
+        /* == Style Bảng == */
+        .table { /* ... (Giữ nguyên) ... */
+        }
+
+        .table > thead { /* ... (GifYữ nguyên) ... */
+        }
+
+        .table-image-thumbnail { /* ... (Giữ nguyên) ... */
+        }
+
+        /* == STYLES MỚI CHO TRANG LOGIN == */
+        .auth-link {
+            color: var(--color-primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-link:hover {
+            color: var(--color-primary-dark);
+            text-decoration: underline;
+        }
+
+        .auth-card-title {
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        /* THAY ĐỔI: Xóa .auth-card và .auth-card > .card-body
+          Vì chúng ta không cần min-height hay căn giữa nữa
+        */
+    </style>
+</th:block>
+<body style="background-color: var(--color-background);">
+<div th:replace="~{fragments/common :: navbar-guest}"></div>
+<div class="container-fluid main-content px-3">
+    <div class="row justify-content-center w-100">
+        <!--
+          THAY ĐỔI KÍCH THƯỚC:
+          Để thống nhất với trang Staff Login
+        -->
+        <div class="col-12 col-md-6 col-lg-5">
+
+            <!-- Unified Card for the form -->
+            <div class="card auth-card">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="text-center mb-0">
+                        <img src="https://upload.wikimedia.org/wikipedia/sco/d/d3/Starbucks_Corporation_Logo_2011.svg"
+                             alt="FPT Logo"
+                             style="height: 80px; width: auto; margin-bottom: 0.5rem;">
+
+                        <!-- THAY ĐỔI: Thêm class .auth-card-title -->
+                        <h3 class="text-center auth-card-title mb-1 fw-bold mt-2">Login Staff</h3>
+                        <p class="text-center auth-card-subtitle text-muted mb-0" style="font-size: 0.9rem;">
+                            Access your management account
+                        </p>
+                        <p  style="color: red; font-weight: 500"  th:text="${error}"></p>
+                    </div>
+
+                    <form th:action="@{/staff/login}" method="post">
+                        <!--
+                          THAY ĐỔI: Bỏ .form-control-lg
+                          Để dùng style chuẩn
+                        -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label fw-semibold">Username</label>
+                            <input type="text" class="form-control" id="username" name="username"
+                                   placeholder="Your username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-semibold">Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="••••••••" required>
+                        </div>
+
+                        <div class="center mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+                                <label class="form-check-label text-muted" for="rememberMe" style="font-size: 0.9em;">
+                                    Remember me
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-4">
+                            <!--
+                              THAY ĐỔI: btn-brand-primary -> btn-primary
+                              CSS chung sẽ tự đổi thành màu cam
+                            -->
+                            <button type="submit" class="btn btn-primary fw-bold">Login</button>
+                        </div>
+                    </form>
+
+                    <div class="auth-divider my-4 text-center text-muted" style="font-size: 0.85em;">
+                        — OR —
+                    </div>
+
+                    <div class="d-grid">
+                        <!--
+                          THAY ĐỔI: btn-warning -> btn-outline-primary
+                          Để thống nhất style nút phụ (viền cam)
+                        -->
+                        <a class="btn btn-outline-primary fw-semibold"
+                           href="/customer/login">
+                            Log in as Customer
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

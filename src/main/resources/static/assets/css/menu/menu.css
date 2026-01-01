@@ -1,0 +1,241 @@
+:root {
+    --brand-primary: #FF7A00;
+    --brand-white: #FFFFFF;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+    --brand-primary-light: #fffaf5; /* Light orange for hover */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--brand-light-gray);
+    color: var(--brand-dark);
+}
+
+/* --- Navbar --- */
+.navbar {
+    background-color: var(--brand-white) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary) !important;
+}
+
+.navbar .nav-link {
+    color: var(--brand-dark) !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-primary) !important;
+}
+
+/* --- Card Style --- */
+.card {
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--brand-white);
+}
+
+/* --- Button Styles --- */
+.btn-brand-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem; /* 8px */
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-brand-primary:hover {
+    background-color: #E66E00;
+    border-color: #E66E00;
+    color: var(--brand-white);
+    transform: translateY(-2px);
+}
+
+/* --- Form Input Style --- */
+.form-control, .form-select {
+    border-radius: 0.5rem; /* 8px */
+    padding: 0.6rem 1rem;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    height: auto;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+}
+
+/* --- Pagination Styling --- */
+.pagination .page-item .page-link {
+    color: var(--brand-primary);
+    border-radius: 0.5rem;
+    margin: 0 0.25rem;
+    border: none;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--brand-primary);
+    color: var(--brand-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--brand-gray);
+}
+
+/* --- Menu Page Specific Styles --- */
+
+/* Category Filter Pills (re-styling radio buttons) */
+.category-filter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+}
+
+/* Custom button style for category */
+.btn-outline-brand {
+    color: var(--brand-dark);
+    border-color: #ced4da;
+    font-weight: 500;
+    border-radius: 2rem; /* pill shape */
+    padding: 0.5rem 1.25rem;
+    background-color: var(--brand-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.btn-outline-brand:hover {
+    color: var(--brand-dark);
+    border-color: var(--brand-primary);
+    background-color: var(--brand-primary-light);
+}
+
+/* When radio is checked, apply primary brand style to its label */
+.btn-check:checked + .btn-outline-brand {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    box-shadow: 0 4px 8px rgba(255, 122, 0, 0.3);
+}
+
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.product-card {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.product-card .card-img-top {
+    width: 100%;
+    height: 240px; /* Fixed height */
+    object-fit: cover; /* Ensures image covers the area, cropping if necessary */
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+}
+
+.product-card .card-body {
+    padding: 1rem 1.25rem;
+    text-align: center;
+}
+
+.product-card .card-title {
+    font-weight: 600;
+    color: var(--brand-dark);
+    margin-bottom: 0.5rem;
+    /* Truncate long text */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-card .card-text {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--brand-primary);
+    margin-bottom: 0;
+}
+
+/* Empty State */
+.empty-state-card {
+    border-radius: 0.75rem;
+    padding: 4rem 2rem;
+    text-align: center;
+    background-color: var(--brand-white);
+}
+
+.empty-state-card i {
+    font-size: 4rem;
+    color: var(--brand-gray);
+    margin-bottom: 1rem;
+}
+
+.empty-state-card h4 {
+    color: var(--brand-dark);
+}
+
+.empty-state-card p {
+    color: var(--brand-gray);
+    font-size: 1.1rem;
+}
+
+     /* Đảm bảo khung banner là vùng chứa tương đối */
+ #banner-slider {
+     position: relative;
+     overflow: hidden;
+ }
+
+/* Nút mũi tên nằm trong khung */
+#banner-slider .swiper-button-next,
+#banner-slider .swiper-button-prev {
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Canh trái-phải gọn gàng */
+#banner-slider .swiper-button-prev {
+    left: 15px;
+}
+#banner-slider .swiper-button-next {
+    right: 15px;
+}
+
+/* Chấm tròn ở trong khung, không bị tràn */
+#banner-slider .swiper-pagination {
+    bottom: 10px !important;
+}
+
+#banner-slider .swiper-pagination-bullet {
+    background: white;
+    opacity: 0.8;
+}
+
+#banner-slider .swiper-pagination-bullet-active {
+    background: white;/* màu chủ đạo tuỳ chỉnh */
+    opacity: 1;
+}
+

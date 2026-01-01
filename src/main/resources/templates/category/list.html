@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Category',
+            pageSpecificCss=~{:: .page-css}
+          )}">
+</head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/product/list.css">
+    <style>
+        /* == :root định nghĩa các biến màu chủ đạo == */
+        :root {
+            --color-primary: #FF7A00; /* Cam chủ đạo */
+            --color-primary-dark: #E06C00; /* Cam đậm hơn khi hover */
+            --color-danger: #dc3545; /* Màu đỏ cho Delete */
+            --color-danger-dark: #b02a37;
+            --color-white: #FFFFFF;
+            --color-background: #f8f9fa; /* Một màu xám rất nhạt cho nền */
+            --color-text-dark: #212529; /* Màu text chính */
+            --color-text-muted: #6c757d; /* Màu text phụ */
+            --font-family-base: 'Inter', sans-serif;
+            --border-radius-base: 0.5rem; /* 8px - bo góc thống nhất */
+            --border-radius-lg: 0.75rem; /* 12px */
+            --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* == Style tổng thể == */
+        body {
+            font-family: var(--font-family-base);
+            background-color: var(--color-background);
+            color: var(--color-text-dark);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+        }
+
+        /* == Style cho Card (Thống nhất) == */
+        .card {
+            border: none;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-base);
+            height: 100%;
+        }
+
+        .card-body {
+            /* Tăng padding cho card chứa bảng */
+            padding: 2.5rem;
+        }
+
+        /* == STYLES CHO BUTTON (Thống nhất) == */
+        /* 1. Button chính (Màu cam) */
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: var(--color-white);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+            color: var(--color-white);
+            box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+        }
+
+        /* 2. Button phụ (Viền cam) */
+        .btn-outline-primary {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+        }
+
+        /* 3. Button Nguy hiểm (Viền đỏ) - MỚI */
+        .btn-outline-danger {
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-danger:hover,
+        .btn-outline-danger:focus,
+        .btn-outline-danger:active {
+            background-color: var(--color-danger);
+            color: var(--color-white);
+            border-color: var(--color-danger);
+        }
+
+        /* Style cho các nút nhỏ (sm) trong bảng
+          Ghi đè padding để chúng nhỏ hơn
+        */
+        .btn-sm.btn-outline-primary,
+        .btn-sm.btn-outline-danger {
+            padding: 0.25rem 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Ghi đè các màu cũ */
+        .btn-warning, .btn-success {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: var(--color-white) !important;
+        }
+
+        .btn-warning:hover, .btn-success:hover {
+            background-color: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger);
+            border-color: var(--color-danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--color-danger-dark);
+            border-color: var(--color-danger-dark);
+        }
+
+
+        /* == Style riêng cho Form (Thống nhất) == */
+        .form-label { /* ... (Giữ nguyên) ... */
+        }
+
+        .form-control, .form-select { /* ... (Giữ nguyên) ... */
+        }
+
+        .form-control:focus, .form-select:focus { /* ... (Giữ nguyên) ... */
+        }
+
+        .form-control[readonly] { /* ... (Giữ nguyên) ... */
+        }
+
+        /* == Style riêng cho Bảng (Thống nhất) == */
+        .table {
+            border-top: none;
+            /* Căn giữa text trong các ô */
+            vertical-align: middle;
+        }
+
+        .table > thead {
+            /* Style này được lấy từ trang "Point History" */
+            color: var(--color-text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            border-bottom-width: 2px;
+        }
+    </style>
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="card p-4 mb-4">
+            <div class="row g-3">
+                <div class="col-12 col-md-4">
+                    <h2 class="fw-bold mb-0">Category List</h2>
+                </div>
+
+                <div class="col-12 col-md-8 d-flex justify-content-md-end gap-2">
+                    <a th:href="@{/category/deleted-list}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-trash me-1"></i> Trash
+                    </a>
+                    <a th:href="@{/category/create}" class="btn btn-brand-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Add New Category
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Đưa nội dung vào một cột giới hạn chiều rộng và căn giữa -->
+        <!-- Cho phép cột rộng hơn một chút cho bảng -->
+
+        <!-- BỌC TẤT CẢ VÀO TRONG CARD -->
+        <div class="card">
+            <div class="card-body p-0">
+
+                <!-- Thông báo khi list rỗng -->
+                <div th:if="${CategoryList.isEmpty()}" class="alert alert-info" role="alert">
+                    There are any category in the system
+                </div>
+
+                <!-- Bảng chỉ hiển thị khi list không rỗng -->
+                <div th:unless="${CategoryList.isEmpty()}">
+
+
+                    <!-- Thông báo khi list rỗng -->
+                    <div th:if="${CategoryList.isEmpty()}" class="alert alert-info" role="alert">
+                        There are any category in the system
+                    </div>
+
+                    <!-- Bảng chỉ hiển thị khi list không rỗng -->
+                    <div th:unless="${CategoryList.isEmpty()}">
+
+                        <div class="table-responsive">
+                            <!--
+                              THAY ĐỔI: Bỏ .table-bordered và .table-striped
+                              (trông hiện đại hơn)
+                              Bỏ .table-dark (header)
+                            -->
+                            <table class="table table-hover">
+                                <thead> <!-- Style đã được định nghĩa trong CSS -->
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Active</th>
+                                    <th scope="col" class="text-end">Action</th> <!-- Căn phải cột Action -->
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="category, iterStat : ${CategoryList}" th:object="${category}">
+
+                                    <td th:text="${iterStat.index + 1}">1</td>
+
+                                    <td th:text="*{cateName}">Sample Category</td>
+
+                                    <td>
+                                        <span th:if="*{active}" class="badge bg-success">Active</span>
+                                        <span th:unless="*{active}" class="badge bg-danger">Inactive</span>
+                                    </td>
+
+                                    <td class="text-end"> <!-- Căn phải các nút -->
+                                        <!--
+                                          THAY ĐỔI: Đổi btn-primary thành btn-outline-primary
+                                        -->
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           th:href="@{/category/edit/{id}(id=*{cateId})}">
+                                            Edit
+                                        </a>
+
+                                        <!--
+                                          THAY ĐỔI QUAN TRỌNG:
+                                          Thay thế confirm() bằng Modal
+
+                                          1. Form được đặt riêng lẻ và có ID duy nhất
+                                        -->
+                                        <form th:action="@{/category/delete/{id}(id=*{cateId})}" method="post"
+                                              th:id="|deleteForm-*{cateId}|"
+                                              style="display:inline;">
+                                            <!-- (không cần nút submit ở đây) -->
+                                        </form>
+
+                                        <!--
+                                          2. Nút này sẽ mở Modal, KHÔNG submit form
+                                             - data-bs-toggle="modal"
+                                             - data-bs-target="#deleteConfirmModal"
+                                             - data-form-id (trỏ tới ID của form cần submit)
+                                             - Đổi btn-danger thành btn-outline-danger
+                                        -->
+                                        <button class="btn btn-sm btn-outline-danger ms-1"
+                                                type="button"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteConfirmModal"
+                                                th:data-form-id="|deleteForm-*{cateId}|">
+                                            Delete
+                                        </button>
+                                    </td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--
+  MODAL XÁC NHẬN XÓA (Thêm mới)
+  Đây là component thay thế cho confirm()
+-->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--border-radius-lg);">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure to delete this category? <br/>
+            </div>
+            <div class="modal-footer border-0">
+                <!-- Nút Cancel (sử dụng style phụ) -->
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <!-- Nút Delete (sử dụng style đỏ .btn-danger) -->
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<!--
+  JavaScript cho Modal (Thêm mới)
+  (Phải đặt sau Bootstrap JS)
+-->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        var confirmDeleteButton = document.getElementById('confirmDeleteButton');
+        var formToSubmit;
+
+        // 1. Khi Modal chuẩn bị được hiển thị
+        deleteConfirmModal.addEventListener('show.bs.modal', function (event) {
+            // Lấy cái nút đã bấm để mở modal
+            var button = event.relatedTarget;
+
+            // Lấy ID của form từ attribute 'data-form-id'
+            var formId = button.getAttribute('data-form-id');
+            formToSubmit = document.getElementById(formId);
+        });
+
+        // 2. Khi bấm nút "Delete" màu đỏ BÊN TRONG MODAL
+        confirmDeleteButton.addEventListener('click', function () {
+            if (formToSubmit) {
+                // Submit cái form đã được lưu
+                formToSubmit.submit();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

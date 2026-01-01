@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header class="container-fluid bg-dark text-white p-3" th:replace="layout/header :: tablebook"></header>
+<body>
+<div th:insert="~{layout/header::navbar-tablebook}"></div>
+<main class="container my-5">
+    <h1 class="text-center mb-4">Table Booking History</h1>
+
+    <div class="card p-4 mb-4">
+        <form method="get" th:action="@{/table/booking/my}">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label" for="startDate">From Date</label>
+                    <input class="form-control" id="startDate" name="startDate" type="date" th:value="${startDate}">
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label" for="endDate">To Date</label>
+                    <input class="form-control" id="endDate" name="endDate" type="date" th:value="${endDate}">
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-select" id="status" name="status" onchange="this.form.submit()">
+                        <option value="">Please select status...</option>
+                        <option th:each="x : ${bookingStatus}" th:text="${x.toUpperCase()}" th:value="${x}" th:selected="${x == status}"></option>
+                    </select>
+                </div>
+                <div class="col-12 col-lg-3 d-flex gap-2 mt-3 mt-lg-0 align-self-end">
+                    <button class="btn btn-secondary w-50" type="button"
+                            onclick="
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('status').value = '';">
+                        CLEAR
+                    </button>
+
+
+                    <button class="btn btn-brand-primary w-50" type="submit">SEARCH</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <!-- Table shown if not empty -->
+            <div class="table-responsive" th:if="${!tableBooking.isEmpty()}">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th class="p-3">Table ID</th>
+                        <th class="p-3">Customer Name</th>
+                        <th class="p-3">Phone Number</th>
+                        <th class="p-3">Booking Status</th>
+                        <th class="p-3">Date and Time
+                        (MM/dd/yyyy)</th>
+                        <th class="p-3">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="x : ${tableBooking}">
+                        <td class="p-3" th:text="${x.table.tableId}">${x.table.tableId}</td>
+                        <td class="p-3" th:text="${x.customer.name}">${x.customer.name}</td>
+                        <td class="p-3" th:text="${x.customer.phoneNumber}">${x.customer.phoneNumber}</td>
+                        <td class="p-3">
+                            <span class="badge"
+                                  th:classappend="|${
+        x.status == 'booked' ? 'text-bg-primary' :
+        (x.status == 'checked-in' ? 'text-bg-success' :
+        (x.status == 'completed' ? 'text-bg-success-subtle text-success' :
+        (x.status == 'canceled' || x.status == 'rejected' ? 'text-bg-danger' :
+        (x.status == 'auto-canceled' ? 'text-bg-warning text-dark' :
+        'text-bg-secondary'))))}|"
+                                  th:text="${x.status}">
+                            </span>
+                        </td>
+                        <td class="p-3" th:text="${#temporals.format(x.bookingTime, 'MM/dd/yyyy HH:mm:ss')}"></td>
+                        <td class="p-3">
+                            <button class="btn btn-outline-danger btn-sm" th:if="${x.status == 'booked'}" th:onclick="openCancelPopup([[${x.bookingId}]] ,[[${x.table.tableId}]] ,
+                                         [[${x.bookingTime}]])"
+                                    type="button">Cancel
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty state shown if table is empty -->
+            <div class="empty-state p-4" th:if="${tableBooking.isEmpty()}">
+                <i class="fa-regular fa-folder-open"></i>
+                <h3>No Bookings Found</h3>
+                <p>Your booking history is empty.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-4" aria-label="Page navigation">
+        <ul class="list-unstyled pagination justify-content-center" th:if="${totalPages > 1}">
+            <li class="page-item" th:classappend="${tableBooking.first} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/table/booking/my(page=${currentPage - 1},
+                    startDate=${startDate}, endDate=${endDate}, status=${status})}">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(1,totalPages)}">
+                <a class="page-link" th:href="@{/table/booking/my(page=${i},
+                    startDate=${startDate}, endDate=${endDate}, status=${status})}" th:text="${i}" th:classappend="${i == tableBooking.number + 1} ? 'active' : ''"></a>
+            </li>
+            <li class="page-item" th:classappend="${tableBooking.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/table/booking/my(page=${currentPage + 1},
+                    startDate=${startDate}, endDate=${endDate}, status=${status})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+
+
+    <!-- Cancel booking Modal -->
+    <div aria-hidden="true" aria-labelledby="cancelModalLabel" class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 0.75rem;">
+                <!-- Header: Kept as warning -->
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="cancelModalLabel">Cancel Table Booking</h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p><strong>Table: </strong> <span id="tableId"></span></p>
+                    <p><strong>Booking Date:</strong> <span id="bookingDate"></span></p>
+                    <p><strong>Booking Time:</strong> <span id="bookingTime"></span></p>
+                    <div class="alert alert-danger mt-3" role="alert">
+                        Are you sure you want to cancel this reservation? This action cannot be undone.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- Note: The form is inside the footer for proper button placement -->
+                    <form method="post" th:action="@{/table/booking/cancel}" class="d-inline">
+                        <input id="tableBookingIdCancelled" name="tableBookingId" type="hidden">
+                        <button class="btn btn-danger" type="submit">Confirm Cancel</button>
+                    </form>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:insert="~{layout/footer}"></div>
+<!-- JS -->
+<script th:inline="javascript">
+    function openCancelPopup(id, tableId, bookingTimeStr) {
+        const dateObj = new Date(bookingTimeStr);
+
+        // Formatting date and time (e.g., "en-GB" for dd/mm/yyyy)
+        const date = new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        }).format(dateObj);
+
+        const time = new Intl.DateTimeFormat("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+        }).format(dateObj);
+
+        document.getElementById("tableId").textContent = tableId;
+        document.getElementById("bookingDate").textContent = date;
+        document.getElementById("bookingTime").textContent = time;
+        document.getElementById("tableBookingIdCancelled").value = id;
+
+        const modalEl = document.getElementById('cancelModal');
+        if (modalEl) {
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    }
+
+    // Cleaned up event listeners
+    document.addEventListener("DOMContentLoaded", function () {
+        const clearButton = document.querySelector('button[type="reset"]');
+        if (clearButton) {
+            clearButton.addEventListener('click', function () {
+                // Reset form fields
+                document.querySelectorAll('.form-control, .form-select').forEach(field => {
+                    if (field.type === 'date') {
+                        field.value = '';
+                    } else if (field.tagName === 'SELECT') {
+                        field.selectedIndex = 0;
+                    }
+                });
+            });
+        }
+
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Vouchers',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/vouchers/trash.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+<!-- Main Content -->
+<div class="container my-5">
+
+    <!-- Header Card with Actions -->
+    <div class="card mb-4">
+        <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <h4 class="fw-bold mb-0">Voucher Trash</h4>
+                <div class="d-flex gap-2 mt-2 mt-md-0">
+                    <a type="button" class="btn btn-outline-secondary" th:href="@{/dashboard/vouchers/list}">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 mt-3">
+                <form class="d-flex" role="search" th:action="@{/dashboard/vouchers/deleted-list}" method="get">
+                    <input class="form-control me-2" type="search" name="keyword"
+                           placeholder="Search Voucher's name..." th:value="${keyword}" aria-label="Search">
+                    <button class="btn btn-brand-primary" type="submit" style="white-space: nowrap;">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vouchers Table Card -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th class="p-3" scope="col">N.O</th>
+                        <th class="p-3" scope="col">Name</th>
+                        <th class="p-3" scope="col">Code</th>
+                        <th class="p-3" scope="col">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Loop through non-active vouchers -->
+                    <tr th:if="${vouchers}" th:each="voucher, iterStat : ${vouchers}" th:object="${voucher}">
+                        <td class="p-3" th:text="${iterStat.count}" scope="row"></td>
+                        <td class="p-3" th:text="*{voucherName}"></td>
+                        <td class="p-3"><span class="badge bg-secondary text-dark bg-opacity-10"
+                                              th:text="*{code}"></span></td>
+                        <td class="p-3">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        th:onclick="openDetailPopup([[${voucher.voucherId}]], [[${voucher.code}]], [[${voucher.voucherName}]], [[${voucher.minOrderValue}]], [[${voucher.discountValue}]], [[${voucher.discountType}]], [[${voucher.quantity}]], [[${voucher.startDate}]], [[${voucher.endDate}]], [[${voucher.discountType}]])">
+                                    Details
+                                </button>
+<!--                                <button type="button" class="btn btn-sm btn-success"-->
+<!--                                        th:onclick="openDeletePopup([[${voucher.voucherId}]] , [[${voucher.code}]], [[${voucher.voucherName}]])">-->
+<!--                                    Restore-->
+<!--                                </button>-->
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Empty State -->
+                    <tr th:if="${vouchers == null or #lists.isEmpty(vouchers)}">
+                        <td colspan="4" class="text-center p-5">
+                            <i class="fa-solid fa-trash fa-2x text-muted mb-3"></i>
+                            <p class="mb-0 text-muted">The voucher trash is empty.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+<!-- Restore Voucher popup (Styled as success) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Restore Voucher</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Voucher Code:</strong> <span id="voucherCode"></span></p>
+                <p><strong>Voucher Name:</strong> <span id="voucherName"></span></p>
+                <div class="alert alert-success mt-3" role="alert">
+                    Are you sure you want to restore this voucher?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form th:action="@{/dashboard/vouchers/restore}">
+                    <input type="hidden" name="voucherId" id="deleteVoucherId">
+                    <button type="submit" class="btn btn-success">Restore</button>
+                </form>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Voucher popup -->
+<div class="modal fade" id="detail" tabindex="-1" aria-labelledby="detailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailLabel">Voucher Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Voucher Code:</strong> <span id="detailCode"></span></p>
+                <p><strong>Voucher Name:</strong> <span id="detailName"></span></p>
+                <p><strong>Min Order Value:</strong> <span id="detailMin"></span></p>
+                <p><strong>Discount Value:</strong> <span id="detailValue"></span></p>
+                <p><strong>Discount Type:</strong> <span id="detailType"></span></p>
+                <p><strong>Quantity:</strong> <span id="detailQuantity"></span></p>
+                <p><strong>Start Date:</strong> <span id="detailStart"></span></p>
+                <p><strong>End Date:</strong> <span id="detailEnd"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<!--JS of RestorePopup-->
+<script>
+    function openDeletePopup(id, code, name) {
+        document.getElementById("voucherCode").textContent = code;
+        document.getElementById("voucherName").textContent = name;
+        document.getElementById("deleteVoucherId").value = id;
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+</script>
+
+<!--JS of DetailPopup-->
+<script>
+    function openDetailPopup(id, code, name, minOrderValue, discountValue, discountType, quantity, startDate, endDate) {
+        document.getElementById("detailCode").textContent = code;
+        document.getElementById("detailName").textContent = name;
+        document.getElementById("detailMin").textContent = minOrderValue;
+        document.getElementById("detailValue").textContent = discountValue;
+        document.getElementById("detailType").textContent = discountType;
+        document.getElementById("detailQuantity").textContent = quantity;
+        document.getElementById("detailStart").textContent = startDate;
+        document.getElementById("detailEnd").textContent = endDate;
+
+        const modal = new bootstrap.Modal(document.getElementById('detail'));
+        modal.show();
+    }
+</script>
+
+</body>
+</html>

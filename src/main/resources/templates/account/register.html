@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Register',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/account/register.css">
+</th:block>
+
+<body>
+
+<div th:replace="~{fragments/common :: navbar-guest}"></div>
+<!-- Page Content -->
+<div class="container-fluid main-content px-3">
+    <div class="row justify-content-center w-100">
+        <!-- Made the card wider for the register form -->
+        <div class="col-12 col-md-6 col-lg-5">
+
+            <!-- Unified Card for the form -->
+            <div class="card auth-card">
+                <div class="card-body p-4 p-md-5">
+
+                    <h2 class="text-center auth-card-title mb-4">Registration Form</h2>
+
+                    <!-- Form with Thymeleaf attributes preserved -->
+                    <form th:action="@{/register}" th:object="${customer}" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="fullName">Full Name</label>
+                                <!-- Removed .form-control-lg, added .form-control -->
+                                <input class="form-control" th:field="*{name}" id="fullName" required type="text"
+                                      />
+                                <div id="error-fullName" class="invalid-feedback d-block"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="username">Username</label>
+                                <input class="form-control" th:field="*{username}" id="username" required type="text"
+                                       />
+                                <div id="error-username" class="invalid-feedback d-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="email">Email</label>
+                                <input class="form-control" th:field="*{email}" id="email" required type="email"
+                                       />
+                                <div id="error-email" class="invalid-feedback d-block"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="phoneNumber">Phone number</label>
+                                <input class="form-control" th:field="*{phoneNumber}" id="phoneNumber" required
+                                       type="tel" />
+                                <div id="error-phone" class="invalid-feedback d-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label" for="birthdate">Birthdate</label>
+                                <input class="form-control" th:field="*{dateOfBirth}" id="birthdate" required
+                                       type="date"/>
+                                <div id="error-birthdate" class="invalid-feedback d-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="password">Password</label>
+                                <input class="form-control" th:field="*{password}" id="password" required
+                                       type="password"/>
+                                <div id="error-password" class="invalid-feedback d-block"></div>
+
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="confirmPassword">Confirm Password</label>
+                                <input class="form-control" id="confirmPassword" required type="password"
+                                       />
+
+                                <!-- Placed error message inside the column -->
+                                <div id="passwordError" class="text-danger mt-2"
+                                     style="display: none; font-size: 0.875em;">
+                                    Passwords do not match!
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <!-- Replaced with unified button class -->
+                            <input class="btn btn-brand-primary w-100" type="submit" value="Register"/>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <span class="text-muted">Already have an account?</span>
+                        <a href="/customer/login" class="text-decoration-none ms-1"
+                           style="color: var(--brand-primary); font-weight: 500;">
+                            Login here
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Popup Modal (Thymeleaf) -->
+<!-- Added a modal-backdrop div for the gray overlay -->
+<div th:if="${errorMessage}" class="modal-backdrop fade show"></div>
+<div th:if="${errorMessage}" class="modal fade show" style="display:block;" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Styled modal-content to match card -->
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger fw-bold">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>Registration Error
+                </h5>
+                <button type="button" class="btn-close" onclick="closePopup()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center fs-6" style="color: var(--brand-dark);">
+                <p th:text="${errorMessage}">Error message will appear here.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <!-- Kept .btn-danger as it's for an error message -->
+                <button class="btn btn-danger" onclick="closePopup()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+
+<!-- Bootstrap 5.3.3 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+
+        // Lấy các trường cần thiết
+        const passwordField = document.getElementById("password");
+        const confirmPasswordField = document.getElementById("confirmPassword");
+
+        // --- HÀM HỖ TRỢ XỬ LÝ LỖI ---
+        function setError(id, message) {
+            const errorElement = document.getElementById(id);
+            if (errorElement) {
+                errorElement.innerText = message;
+            }
+        }
+
+        function clearError(id) {
+            const errorElement = document.getElementById(id);
+            if (errorElement) {
+                errorElement.innerText = "";
+            }
+        }
+
+        // --- VALIDATION XÁC NHẬN MẬT KHẨU THEO THỜI GIAN THỰC ---
+        function validatePasswordMatch() {
+            // Không làm gì nếu không có cả hai trường
+            if (!passwordField || !confirmPasswordField) return true;
+
+            const passwordValue = passwordField.value;
+            const confirmValue = confirmPasswordField.value;
+
+            // Nếu trường xác nhận rỗng, chỉ cần xóa trạng thái validation (để không báo lỗi khi chưa gõ)
+            if (confirmValue.trim() === "") {
+                clearError("error-confirmPassword");
+                confirmPasswordField.classList.remove("is-invalid", "is-valid");
+                return true;
+            }
+
+            if (passwordValue === confirmValue) {
+                // Mật khẩu khớp
+                clearError("error-confirmPassword");
+                confirmPasswordField.classList.remove("is-invalid");
+                confirmPasswordField.classList.add("is-valid");
+                return true;
+            } else {
+                // Mật khẩu không khớp
+                setError("error-confirmPassword", "Passwords do not match.");
+                confirmPasswordField.classList.remove("is-valid");
+                confirmPasswordField.classList.add("is-invalid");
+                return false;
+            }
+        }
+
+        // Gắn sự kiện kiểm tra khớp khi người dùng gõ
+        if (passwordField && confirmPasswordField) {
+            passwordField.addEventListener("input", validatePasswordMatch);
+            confirmPasswordField.addEventListener("input", validatePasswordMatch);
+        }
+
+        // --- XỬ LÝ SỰ KIỆN SUBMIT CHÍNH ---
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                let valid = true;
+
+                // Lấy giá trị
+                const fullName = document.getElementById("fullName")?.value?.trim() || "";
+                const username = document.getElementById("username")?.value?.trim() || "";
+                const email = document.getElementById("email")?.value?.trim() || "";
+                const phone = document.getElementById("phoneNumber")?.value?.trim() || "";
+                const birthdate = document.getElementById("birthdate")?.value?.trim() || "";
+                const password = passwordField?.value?.trim() || "";
+
+                // Clear lỗi trước đó
+                clearError("error-fullName");
+                clearError("error-username");
+                clearError("error-email");
+                clearError("error-phone");
+                clearError("error-birthdate");
+                clearError("error-password");
+                clearError("error-confirmPassword"); // Cho trường xác nhận mật khẩu
+
+                /* ---------------------------
+                   FULL NAME VALIDATION
+                ----------------------------*/
+                if (!fullName) {
+                    setError("error-fullName", "Full name cannot be null or blank");
+                    valid = false;
+                } else if (!/^[\p{L} ]+$/u.test(fullName)) {
+                    setError("error-fullName", "Full name can only contain letters");
+                    valid = false;
+                }
+
+                /* ---------------------------
+                   USERNAME VALIDATION
+                ----------------------------*/
+                if (!username) {
+                    setError("error-username", "Username cannot be null or blank");
+                    valid = false;
+                } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                    setError("error-username", "Username can only contain letters, digits, and underscores");
+                    valid = false;
+                }
+
+                /* ---------------------------
+                   EMAIL VALIDATION
+                ----------------------------*/
+                if (!email) {
+                    setError("error-email", "Email cannot be null or blank");
+                    valid = false;
+                } else if (!/^[\w._%+-]+@[\w.-]+\.[a-zA-Z]{2,6}$/.test(email)) {
+                    setError("error-email", "Invalid email format");
+                    valid = false;
+                }
+
+                /* ---------------------------
+                   PHONE VALIDATION
+                ----------------------------*/
+                if (!phone) {
+                    setError("error-phone", "Phone number cannot be null or blank");
+                    valid = false;
+                } else if (!/^\d{10}$/.test(phone)) {
+                    setError("error-phone", "Phone number must contain exactly 10 digits");
+                    valid = false;
+                } else if (phone === "0000000000") {
+                    setError("error-phone", "Phone number cannot be all zeros");
+                    valid = false;
+                }
+
+                /* ---------------------------
+                   DATE OF BIRTH VALIDATION
+                ----------------------------*/
+                if (!birthdate) {
+                    setError("error-birthdate", "Date of birth cannot be null");
+                    valid = false;
+                } else {
+                    const dob = new Date(birthdate);
+                    const today = new Date();
+
+                    let age = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                        age--;
+                    }
+
+                    if (age < 15 || age > 100) {
+                        setError("error-birthdate", "Your age must be greater than 15.");
+                        valid = false;
+                    }
+                }
+
+                /* ---------------------------
+                   PASSWORD VALIDATION (Độ mạnh)
+                ----------------------------*/
+                let passwordValid = true;
+                if (passwordField) { // Chỉ kiểm tra nếu trường mật khẩu tồn tại
+                    if (!password) {
+                        setError("error-password", "Password cannot be null or blank");
+                        passwordValid = false;
+                    } else if (password.length < 8 || password.length > 64) {
+                        setError("error-password", "Password must be between 8 and 64 characters");
+                        passwordValid = false;
+                    } else if (password.includes(" ")) {
+                        setError("error-password", "Password must not contain spaces");
+                        passwordValid = false;
+                    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+/.test(password)) {
+                        setError("error-password",
+                            "Password must contain at least one uppercase letter, one lowercase letter, one digit and one special character"
+                        );
+                        passwordValid = false;
+                    }
+                }
+                if (!passwordValid) valid = false;
+
+                /* ---------------------------
+                   CONFIRM PASSWORD VALIDATION (Khớp)
+                ----------------------------*/
+                if (confirmPasswordField) {
+                    const match = validatePasswordMatch(); // Chạy lại kiểm tra khớp
+                    if (!match) {
+                        valid = false;
+                        // Focus vào trường confirm password nếu nó là lỗi đầu tiên
+                        if (valid) confirmPasswordField.focus();
+                    }
+                }
+
+                // Chặn submit nếu có bất kỳ lỗi nào
+                if (!valid) {
+                    e.preventDefault();
+                    // Bạn có thể thêm logic để focus vào trường lỗi đầu tiên tại đây
+                }
+            });
+        }
+    });
+
+    // Hàm closePopup giữ nguyên (dành cho modal nếu có)
+    function closePopup() {
+        // Find all elements associated with the modal and hide them
+        const modal = document.querySelector('.modal.show');
+        const backdrop = document.querySelector('.modal-backdrop.show');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        if (backdrop) {
+            backdrop.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

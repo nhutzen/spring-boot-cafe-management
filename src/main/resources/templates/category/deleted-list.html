@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Category',
+            pageSpecificCss=~{:: .page-css}
+          )}">
+</head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/product/list.css">
+    <style>
+        /* == :root định nghĩa các biến màu chủ đạo == */
+        :root {
+            --color-primary: #FF7A00; /* Cam chủ đạo */
+            --color-primary-dark: #E06C00; /* Cam đậm hơn khi hover */
+            --color-danger: #dc3545; /* Màu đỏ cho Delete */
+            --color-danger-dark: #b02a37;
+            --color-white: #FFFFFF;
+            --color-background: #f8f9fa; /* Một màu xám rất nhạt cho nền */
+            --color-text-dark: #212529; /* Màu text chính */
+            --color-text-muted: #6c757d; /* Màu text phụ */
+            --font-family-base: 'Inter', sans-serif;
+            --border-radius-base: 0.5rem; /* 8px - bo góc thống nhất */
+            --border-radius-lg: 0.75rem; /* 12px */
+            --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* == Style tổng thể == */
+        body {
+            font-family: var(--font-family-base);
+            background-color: var(--color-background);
+            color: var(--color-text-dark);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+        }
+
+        /* == Style cho Card (Thống nhất) == */
+        .card {
+            border: none;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-base);
+            height: 100%;
+        }
+
+        .card-body {
+            /* Tăng padding cho card chứa bảng */
+            padding: 2.5rem;
+        }
+
+        /* == STYLES CHO BUTTON (Thống nhất) == */
+        /* 1. Button chính (Màu cam) */
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: var(--color-white);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+            color: var(--color-white);
+            box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+        }
+
+        /* 2. Button phụ (Viền cam) */
+        .btn-outline-primary {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+        }
+
+        /* 3. Button Nguy hiểm (Viền đỏ) - MỚI */
+        .btn-outline-danger {
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+            font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border-radius: var(--border-radius-base);
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-danger:hover,
+        .btn-outline-danger:focus,
+        .btn-outline-danger:active {
+            background-color: var(--color-danger);
+            color: var(--color-white);
+            border-color: var(--color-danger);
+        }
+
+        /* Style cho các nút nhỏ (sm) trong bảng
+          Ghi đè padding để chúng nhỏ hơn
+        */
+        .btn-sm.btn-outline-primary,
+        .btn-sm.btn-outline-danger {
+            padding: 0.25rem 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Ghi đè các màu cũ */
+        .btn-warning, .btn-success {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: var(--color-white) !important;
+        }
+
+        .btn-warning:hover, .btn-success:hover {
+            background-color: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger);
+            border-color: var(--color-danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--color-danger-dark);
+            border-color: var(--color-danger-dark);
+        }
+
+
+        /* == Style riêng cho Form (Thống nhất) == */
+        .form-label { /* ... (Giữ nguyên) ... */
+        }
+
+        .form-control, .form-select { /* ... (Giữ nguyên) ... */
+        }
+
+        .form-control:focus, .form-select:focus { /* ... (Giữ nguyên) ... */
+        }
+
+        .form-control[readonly] { /* ... (Giữ nguyên) ... */
+        }
+
+        /* == Style riêng cho Bảng (Thống nhất) == */
+        .table {
+            border-top: none;
+            /* Căn giữa text trong các ô */
+            vertical-align: middle;
+        }
+
+        .table > thead {
+            /* Style này được lấy từ trang "Point History" */
+            color: var(--color-text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            border-bottom-width: 2px;
+        }
+    </style>
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+<div class="container mt-5">
+    <h1 class="mb-4 text-primary" th:text="${title}">Category List</h1>
+
+    <a class="btn btn-success mb-3" th:href="@{/category/create}">+ Create new category</a>
+    <div th:if="${categoryList.isEmpty()}" class="alert alert-info" role="alert">
+        There are any category in the system
+    </div>
+
+
+    <div th:unless="${categoryList.isEmpty()}">
+
+
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Active</th>
+                    <th scope="col">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="category, iterStat : ${categoryList}" th:object="${category}">
+
+                    <td th:text="${iterStat.index + 1}">1</td>
+
+                    <td th:text="*{cateName}"></td>
+
+                    <td>
+                        <span th:if="*{active}" class="badge bg-success">Active</span>
+                        <span th:unless="*{active}" class="badge bg-danger">Inactive</span>
+                    </td>
+
+                    <td>
+                        <a class="btn btn-sm btn-primary" th:href="@{/category/edit/{id}(id=*{cateId})}">Edit</a>
+
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+</body>
+</html>

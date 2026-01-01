@@ -1,0 +1,162 @@
+:root {
+    --brand-primary: #FF7A00;
+    --brand-white: #ffffff;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--brand-light-gray);
+    color: var(--brand-dark);
+}
+
+/* --- Navbar (Placeholder) --- */
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary);
+}
+
+.navbar-brand-logo:hover {
+    color: #E66E00; /* Darker orange */
+}
+
+.main-content {
+    min-height: calc(100vh - 56px); /* 100% height minus navbar (56px) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Unified Card Style --- */
+.card.auth-card {
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Unified Button Style --- */
+.btn-brand-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    font-weight: 600;
+    padding: 0.75rem 1rem; /* 12px 16px */
+    border-radius: 0.5rem; /* 8px */
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-brand-primary:hover {
+    background-color: #E66E00; /* Darker orange */
+    border-color: #E66E00;
+    color: var(--brand-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-brand-primary:focus,
+.btn-brand-primary:active {
+    background-color: #CC6200;
+    border-color: #CC6200;
+    color: var(--brand-white);
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.5);
+}
+
+/* --- Google Button Style --- */
+.btn-outline-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* 8px */
+    border: 1px solid #ced4da;
+    color: var(--brand-dark);
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    background-color: var(--brand-white);
+}
+
+.btn-outline-google:hover {
+    border-color: #adb5bd;
+    background-color: #f8f9fa;
+    color: var(--brand-dark);
+}
+
+
+/* --- Unified Form Input Style --- */
+.form-control {
+    border-radius: 0.5rem; /* 8px */
+    padding: 0.75rem 1rem; /* 12px 16px */
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    height: auto;
+}
+
+.form-control:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.form-check-input:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.auth-card-title {
+    font-weight: 700;
+    color: var(--brand-dark);
+}
+
+.auth-card-subtitle {
+    color: var(--brand-gray);
+}
+
+/* --- Divider (OR) --- */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--brand-gray);
+    font-size: 0.875em;
+    font-weight: 500;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.auth-divider:not(:empty)::before {
+    margin-right: 1rem;
+}
+
+.auth-divider:not(:empty)::after {
+    margin-left: 1rem;
+}
+
+/* --- Auth Links --- */
+.auth-link {
+    text-decoration: none;
+    color: var(--brand-primary);
+    font-weight: 500;
+}
+
+.auth-link:hover {
+    color: #E66E00;
+    text-decoration: underline;
+}

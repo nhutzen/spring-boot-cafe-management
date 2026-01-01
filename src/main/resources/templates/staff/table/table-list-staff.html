@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<header class="container-fluid bg-dark text-white p-3" th:replace="layout/header :: tablemanage"></header>
+
+<style>
+    :root {
+        --brand-primary: #ff6b35;
+        --brand-secondary: #ff6b35;
+        --status-available: #28a745;
+        --status-booked: #ffc107;
+        --status-occupied: #dc3545;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .table-hover tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f3f5;
+        transform: scale(1.01);
+    }
+
+    /* Status Badge Styles */
+
+    .badge-available {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-booked {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-occupied {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Select Status Styles */
+    .table-status {
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .status-available {
+        background-color: #d4edda;
+        color: #155724;
+        border-color: #c3e6cb;
+    }
+
+    .status-booked {
+        background-color: #fff3cd;
+        color: #856404;
+        border-color: #ffeaa7;
+    }
+
+    .status-occupied {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+
+    /* Toast Notification */
+    .notification-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        min-width: 300px;
+        padding: 16px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        opacity: 0;
+        transform: translateX(400px);
+        transition: all 0.3s ease;
+    }
+
+    .notification-toast.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .notification-toast.bg-success {
+        background-color: #28a745;
+    }
+
+    .notification-toast.bg-danger {
+        background-color: #dc3545;
+    }
+
+    .notification-toast i {
+        margin-right: 10px;
+    }
+
+    /* Header Styling */
+    h1 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 2rem;
+    }
+
+    /* Filter Section */
+    /* Filter Section - Solid White/Light Color */
+    .filter-card {
+        background: white; /* Solid white background */
+        color: #2c3e50; /* Changed text color to dark for contrast */
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); /* Re-add shadow for definition */
+    }
+
+    /* You would also need to update the text/select styles inside this card: */
+    .filter-card .form-label {
+        color: #2c3e50; /* Changed label text color */
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-card .form-select {
+        border: 1px solid #ced4da; /* Standard border */
+        background-color: white;
+        border-radius: 8px;
+        color: #495057;
+    }
+
+    .filter-card .form-select:focus {
+        border-color: #ff6b35;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+    }
+
+    .filter-card .btn {
+        background-color: #ff6b35; /* Button remains brand color */
+        color: white;
+        font-weight: 600;
+        border: none;
+    }
+
+    .filter-card .btn:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+    }
+
+    /* Table Header */
+    /* Table Header - MODIFIED TO SOLID COLOR */
+    thead {
+        background: #ffffff; /* Solid color: using the first color from the original gradient */
+        color: white;
+    }
+
+    thead th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.5px;
+        border: none !important;
+    }
+
+    /* Capacity Icon */
+    .capacity-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .capacity-text i {
+        color: #ed8f8f;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #000000;
+        margin-bottom: 1rem;
+    }
+
+    /* Loading Spinner */
+    .spinner-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9998;
+    }
+
+    .spinner-overlay.active {
+        display: flex;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .notification-toast {
+            right: 10px;
+            left: 10px;
+            min-width: auto;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
+
+    /* Statistics Cards */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        border-left: 4px solid;
+    }
+
+    /*.stat-card.available {*/
+    /*    border-color: var(--status-available);*/
+    /*}*/
+
+    /*.stat-card.booked {*/
+    /*    border-color: var(--status-booked);*/
+    /*}*/
+
+    /*.stat-card.occupied {*/
+    /*    border-color: var(--status-occupied);*/
+    /*}*/
+
+    .stat-card h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .stat-card p {
+        color: #6c757d;
+        margin: 0.5rem 0 0 0;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<body>
+<div th:insert="~{layout/header::navbar-tablemanage}"></div>
+
+<!-- Toast Notification -->
+<div class="notification-toast" id="notification-toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="notification-message"></span>
+</div>
+
+<!-- Loading Spinner -->
+<div class="spinner-overlay" id="spinner-overlay">
+    <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<main class="container my-5">
+    <!-- Header -->
+    <h1 class="text-center mb-4">
+        <i class="fas fa-table me-2"></i>Table Management
+    </h1>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container" th:if="${tableStats != null}">
+        <div class="stat-card available">
+            <h3 th:text="${tableStats.available ?: 0}">0</h3>
+            <p><i class="fas fa-check-circle me-1"></i>Available</p>
+        </div>
+        <div class="stat-card booked">
+            <h3 th:text="${tableStats.booked ?: 0}">0</h3>
+            <p><i class="fas fa-calendar-check me-1"></i>Booked</p>
+        </div>
+        <div class="stat-card occupied">
+            <h3 th:text="${tableStats.occupied ?: 0}">0</h3>
+            <p><i class="fas fa-users me-1"></i>Occupied</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card filter-card mb-4">
+        <form class="row g-3 align-items-end" method="get" th:action="@{/table/management}">
+            <!-- Filter by Status -->
+            <div class="col-12 col-md-4">
+                <label class="form-label" for="status-filter">
+                    <i class="fas fa-filter me-2"></i>Filter by Status
+                </label>
+                <select class="form-select" id="status-filter" name="status">
+                    <option value="">All Status</option>
+                    <option th:selected="${status == 'available'}" value="available">Available</option>
+                    <option th:selected="${status == 'booked'}" value="booked">Booked</option>
+                    <option th:selected="${status == 'occupied'}" value="occupied">Occupied</option>
+                </select>
+            </div>
+
+            <!-- Filter by Capacity -->
+            <div class="col-12 col-md-4">
+                <label class="form-label" for="capacity-filter">
+                    <i class="fas btn-outline-secondary me-2"></i>Filter by Capacity
+                </label>
+                <select class="form-select" id="capacity-filter" name="capacity">
+                    <option value="">All Capacity</option>
+                    <option th:each="x : ${capacityList}" th:selected="${x == capacity}" th:text="${x}"
+                            th:value="${x}"></option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <button class="btn w-100" type="submit">
+                    <i class="fas fa-search me-2"></i>Apply Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${param.success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${param.error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <button class="btn btn-primary btn-lg my-3"
+            data-bs-target="#moveModal"
+            data-bs-toggle="modal">
+        <i class="fas fa-arrows-alt me-1"></i> Switch Table
+    </button>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th class="p-3" style="width: 25%">
+                            <i class="fas fa-hashtag me-2"></i>Table ID
+                        </th>
+                        <th class="p-3" style="width: 35%">
+                            <i class="fas fa-users me-2"></i>Capacity
+                        </th>
+                        <th class="p-3" style="width: 40%">
+                            <i class="fas fa-edit me-2"></i>Status
+                        </th>
+                        <th class="p-3" style="width: 35%">
+                            <i class="fas fa-users me-2"></i>Action
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="x : ${tables}">
+                        <td class="p-3">
+                            <strong th:text="${x.tableId}"></strong>
+                        </td>
+                        <td class="p-3">
+                            <div class="capacity-text">
+                                <i class="fas fa-user-friends"></i>
+                                <span th:text="${x.capacity} + ' people'"></span>
+                            </div>
+                        </td>
+                        <td class="p-3">
+                            <!--                            <select class="form-select table-status"-->
+                            <!--                                    name="status"-->
+                            <!--                                    th:data-id="${x.tableId}"-->
+                            <!--                                    th:value="${x.status}"-->
+                            <!--                            disabled>-->
+                            <!--                                <option class="status-available"-->
+                            <!--                                        th:selected="${x.status == 'available'}"-->
+                            <!--                                        value="available">-->
+                            <!--                                    <i class="fas fa-check-circle"></i> Available-->
+                            <!--                                </option>-->
+                            <!--                                <option class="status-booked"-->
+                            <!--                                        disabled-->
+                            <!--                                        th:if="${x.status != 'occupied'}"-->
+                            <!--                                        th:selected="${x.status == 'booked'}" value="booked">-->
+                            <!--                                    <i class="fas fa-calendar-check"></i> Booked-->
+                            <!--                                </option>-->
+                            <!--                                <option class="status-occupied"-->
+                            <!--                                        th:if="${x.status != 'booked'}"-->
+                            <!--                                        th:selected="${x.status == 'occupied'}"-->
+                            <!--                                        value="occupied">-->
+                            <!--                                    <i class="fas fa-users"></i> Occupied-->
+                            <!--                                </option>-->
+                            <!--                            </select>-->
+                            <span class="badge"
+                                  th:classappend="|${
+        x.status == 'booked' ? 'text-bg-primary' :
+        (x.status == 'available' ? 'text-bg-success' :
+        (x.status == 'occupied' ? 'text-bg-danger' :
+        'text-bg-secondary'))}|" th:text="${x.status}">
+                            </span>
+                        </td>
+                        <td>
+                            <div th:if="${x.status == 'occupied'}">
+                                <form method="post" th:action="@{/table/management/update-status}">
+                                    <input name="tableId" th:value="${x.tableId}" type="hidden">
+                                    <input name="status" type="hidden" value="available">
+                                    <button class="btn btn-success" type="submit">Available</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Empty State -->
+                    <tr th:if="${#lists.isEmpty(tables)}">
+                        <td colspan="3">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <h4>No Tables Found</h4>
+                                <p>Try adjusting your filters or add new tables.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Move Table Booking Modal -->
+<div aria-hidden="true" aria-labelledby="moveModalLabel" class="modal fade" id="moveModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 0.75rem;">
+            <!-- Header -->
+            <div class="modal-header bg-info text-dark">
+                <h5 class="modal-title" id="moveModalLabel">Switch table</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body text-dark">
+                <form method="post" th:action="@{/table/management/move}">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="oldTableId">Current Table</label>
+                        <select class="form-select bg-white text-dark" id="oldTableId" name="oldTableId" required>
+                            <option value="">-- Select Current Table --</option>
+                            <option th:each="table : ${occupied}"
+                                    th:text="${table.tableId}"
+                                    th:value="${table.tableId}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="newTableId">New Table</label>
+                        <select class="form-select bg-white text-dark" id="newTableId" name="newTableId" required>
+                            <option value="">-- Select New Table --</option>
+                            <option th:each="table : ${available}"
+                                    th:text="${table.tableId}"
+                                    th:value="${table.tableId}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="text-end">
+                        <button class="btn btn-primary" type="submit">Confirm Move</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const moveModal = document.getElementById('moveModal');
+        moveModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+        });
+    });
+</script>
+
+
+<div th:insert="~{layout/footer}"></div>
+<!-- Bootstrap JS -->
+<script crossorigin="anonymous"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JS -->
+<script>
+    // --- Notification Toast Function ---
+    const toastEl = document.getElementById('notification-toast');
+    const toastMessageEl = document.getElementById('notification-message');
+    const spinnerEl = document.getElementById('spinner-overlay');
+    let toastTimeout;
+
+    function showNotification(message, isError = false) {
+        if (toastTimeout) {
+            clearTimeout(toastTimeout);
+        }
+
+        toastMessageEl.textContent = message;
+        toastEl.className = 'notification-toast';
+
+        if (isError) {
+            toastEl.classList.add('bg-danger');
+            toastEl.querySelector('i').className = 'fas fa-exclamation-circle';
+        } else {
+            toastEl.classList.add('bg-success');
+            toastEl.querySelector('i').className = 'fas fa-check-circle';
+        }
+
+        toastEl.classList.add('show');
+
+        toastTimeout = setTimeout(() => {
+            toastEl.classList.remove('show');
+        }, 3000);
+    }
+
+    function showSpinner() {
+        spinnerEl.classList.add('active');
+    }
+
+    function hideSpinner() {
+        spinnerEl.classList.remove('active');
+    }
+
+    // --- Select Color Function ---
+    function setSelectColor(select) {
+        select.classList.remove('status-available', 'status-booked', 'status-occupied');
+        if (select.value === 'available') {
+            select.classList.add('status-available');
+        } else if (select.value === 'booked') {
+            select.classList.add('status-booked');
+        } else if (select.value === 'occupied') {
+            select.classList.add('status-occupied');
+        }
+    }
+
+    // Initialize select colors
+    document.querySelectorAll('.table-status').forEach(select => {
+        setSelectColor(select);
+        select.addEventListener('change', function () {
+            setSelectColor(this);
+        });
+    });
+
+    // --- API Call with CSRF ---
+    const tokenEl = document.querySelector('meta[name="_csrf"]');
+    const headerEl = document.querySelector('meta[name="_csrf_header"]');
+
+    if (tokenEl && headerEl) {
+        const token = tokenEl.content;
+        const header = headerEl.content;
+
+        document.querySelectorAll('.table-status').forEach(select => {
+            select.addEventListener('change', function () {
+                const tableId = this.dataset.id;
+                const newStatus = this.value;
+                const previousStatus = this.getAttribute('data-previous-status') || this.value;
+
+                // Store previous status for rollback
+                this.setAttribute('data-previous-status', previousStatus);
+
+                showSpinner();
+
+                fetch('/table/management/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    },
+                    body: JSON.stringify({tableId: tableId, status: newStatus})
+                })
+                    .then(res => {
+                        if (!res.ok) {
+                            return res.text().then(text => {
+                                throw new Error(text || 'Network response was not OK');
+                            });
+                        }
+                        return res.text();
+                    })
+                    .then(msg => {
+                        hideSpinner();
+                        showNotification(msg || 'Status updated successfully!', false);
+
+                        // Update previous status
+                        this.setAttribute('data-previous-status', newStatus);
+
+                        // Reload after a short delay
+                        setTimeout(() => window.location.reload(), 100);
+                    })
+                    .catch(err => {
+                        hideSpinner();
+                        showNotification('Error: ' + err.message, true);
+
+                        // Rollback to previous status
+                        this.value = previousStatus;
+                        setSelectColor(this);
+                    });
+            });
+        });
+    } else {
+        console.error('CSRF meta tags not found. API calls will fail.');
+        showNotification('Security tokens not found. Please refresh the page.', true);
+    }
+
+    // Add smooth scroll behavior
+    // document.documentElement.style.scrollBehavior = 'smooth';
+</script>
+</body>
+</html>

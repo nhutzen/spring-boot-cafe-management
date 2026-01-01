@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Create Order',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/order/create.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+
+<div class="main-container">
+    <h2>Create In-Store Order</h2>
+    <div th:if="${warning}" class="alert alert-warning mt-2" th:text="${warning}"></div>
+    <div th:if="${error}" class="alert alert-danger mt-2" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success mt-2" th:text="${success}"></div>
+
+    <form th:action="@{/order/create}" method="post" onsubmit="handleOrderSubmit(event)">
+
+        <div class="mainContainer">
+
+            <div class="menu-panel">
+                <div class="menu-header">
+                    <div class="categories">
+                        <h3 style="font-size:17px;">Menu Category</h3>
+
+                        <div id="categoryButtons" class="d-flex gap-2 flex-wrap">
+
+                            <button type="button"
+                                    class="btn btn-sm category-button"
+                                    th:classappend="${selectedCategoryId == 0 ? 'btn-custom-active' : 'btn-custom-inactive'}"
+                                    data-category-id="0">
+                                All
+                            </button>
+
+                            <button type="button"
+                                    th:each="category : ${categoryList}"
+                                    class="btn btn-sm category-button"
+                                    th:classappend="${selectedCategoryId == category.cateId ? 'btn-custom-active' : 'btn-custom-inactive'}"
+                                    th:data-category-id="${category.cateId}"
+                                    th:text="${category.cateName}">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="search-bar">
+                        <div class="input-group">
+                            <input type="text"
+                                   id="searchInput"
+                                   name="query"
+                                   placeholder="Search..."
+                                   th:value="${query}">
+
+                            <button class="btn btn-orange" type="button" id="searchButton">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-grid">
+
+                    <div th:each="product : ${productList}"
+                         th:if="${product.quantity > 0}"
+                         class="product-card"
+                         th:data-product-id="${product.proId}"
+                         th:data-product-stock="${product.quantity}"
+                         th:data-product-description="${product.description}"
+                         th:data-product-category="${product.category != null ? product.category.cateName : 'N/A'}"
+                    >
+
+                        <button type="button" class="btn-add-product">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                        <img th:src="@{/uploads/{img}(img=${product.img})}" alt="Product Image"/>
+                        <p class="product-name fw-semibold" th:text="${product.proName}"></p>
+
+                        <p class="product-quantity mb-1 fw-bold">
+                            <span th:text="|In-stock: ${product.quantity}|"></span>
+                        </p>
+
+                        <p class="product-price mb-0">
+                            <b th:text="${#strings.concat(#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT'), ' VND')}"></b>
+                        </p>
+                    </div>
+
+                </div>
+
+                <nav aria-label="Product pagination">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/order/create(page=${currentPage - 1}, categoryId=${selectedCategoryId}, query=${query})}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">Prev</span>
+                            </a>
+                        </li>
+
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link"
+                               th:href="@{/order/create(page=${i}, categoryId=${selectedCategoryId}, query=${query})}"
+                               th:text="${i}"></a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/order/create(page=${currentPage + 1}, categoryId=${selectedCategoryId}, query=${query})}"
+                               aria-label="Next">
+                                <span aria-hidden="true">Next</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+            </div>
+
+
+            <div class="order-panel">
+                <h3>Order Menu</h3>
+                <div class="order-list"></div>
+
+                <div class="customer-info">
+
+                    <div style="display:flex;gap:8px;align-items:center; margin-bottom: 10px;">
+
+                        <label style="font-size:16px; font-weight: 600; margin-bottom: 0; white-space: nowrap;">Phone Number:</label>
+
+                        <input type="text" name="customerPhone" placeholder="0123456789"
+                               th:value="${customerPhone}"
+                               class="form-control form-control-sm" style="width: 150px;">
+
+                        <button type="button"
+                                class="btn btn-block btn-orange"
+                                name="action"
+                                value="check">
+                            Check
+                        </button>
+                    </div>
+
+
+                    <h4 style="font-size:16px;">Customer Info</h4>
+                    <p>Name: <span th:text="${customer != null ? customer.name : '-'}"></span></p>
+                    <p>Point: <span th:text="${customer != null ? customer.point : 0}"></span></p>
+
+                    <div class="redeem">
+                        <label>Redeem Points:</label>
+
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <input type="number" name="pointsUsed" id="pointsUsed" value="0" min="0"
+                                   th:attr="data-max=${customer != null ? customer.point : 0}"
+                                   style="width:80px;text-align:center;font-weight:600;"
+                                   class="form-control form-control-sm">
+
+                            <button type="button" class="btn btn-sm btn-orange"
+                                    id="maxPointsButton"
+                                    style="height: 31px; line-height: 1;"
+                                    th:disabled="${customer == null}"> Max
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-info" style="display:flex;gap:8px;align-items:center; margin-bottom: 10px; margin-top: 15px;">
+                        <label style="font-size:16px; font-weight: 600; margin-bottom: 0; white-space: nowrap;">Table:</label>
+
+                        <div th:if="${bookedTable != null}">
+
+                            <input type="text" class="form-control form-control-sm"
+                                   th:value="|Table ${bookedTable.tableId} (Booked)|"
+                                   style="width: 200px; background-color: #e9ecef;"/>
+                            <input type="hidden" name="tableId" th:value="${bookedTable.tableId}" />
+                            <!--                            <div style="display:flex; flex-direction: column; gap: 5px;">-->
+                            <!--                                <div th:each="table : ${bookedTables}">-->
+                            <!--                                    <input type="text" class="form-control form-control-sm"-->
+                            <!--                                           th:value="|Table ${table.tableId} (booked)|"-->
+                            <!--                                           disabled-->
+                            <!--                                           style="width: 200px; background-color: #e9ecef;"/>-->
+                            <!--                                    <input type="hidden" name="tableIds[]" th:value="${table.tableId}" />-->
+                            <!--                                </div>-->
+
+                            <!--                                <span style="font-size: 12px; color: green;">* Đã check-in toàn bộ đặt bàn.</span>-->
+                            <!--                            </div>-->
+                        </div>
+
+                        <div th:if="${bookedTable == null}">
+                            <select name="tableId" class="form-select form-select-sm" style="width: 200px;">
+                                <option value="">Take-away</option>
+                                <option th:each="table : ${tableList}"
+                                        th:value="${table.tableId}"
+                                        th:text="|Table ${table.tableId} (Capacity: ${table.capacity}) ${table.status == 'booked' ? 'BOOKED' : ''}|"
+                                        th:disabled="${table.status == 'booked'}"
+                                >
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="voucher" style="display:flex;gap:8px;align-items:center; margin-bottom: 10px;">
+
+                        <label style="font-size:16px; font-weight: 600; margin-bottom: 0; margin-top: 15px; white-space: nowrap;">Voucher:</label>
+
+                        <select name="voucherId" class="form-select form-select-sm" style="width: 150px;"
+                                th:disabled="${customer == null}">
+
+                            <option value=""
+                                    data-type="NONE"
+                                    data-value="0"
+                                    data-min-order="0"
+                                    selected>
+                                None
+                            </option>
+
+                            <option th:each="v : ${voucherList}"
+                                    th:value="${v.voucherId}"
+                                    th:text="${v.voucherName}"
+                                    th:data-type="${v.discountType}"
+                                    th:data-value="${v.discountValue}"
+                                    th:data-min-order="${v.minOrderValue}">
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="price-summary" style="margin-top: 15px; font-size: 16px; font-weight: 500;">
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Subtotal:</span>
+                        <span id="totalPrice">0 VND</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Voucher:</span>
+                        <span id="displayVoucherDiscount" class="text-danger">- 0 VND</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Points:</span>
+                        <span id="displayPointsDiscount" class="text-danger">- 0 VND</span>
+                    </div>
+                </div>
+
+                <hr/>
+                <div class="place-container">
+
+                    <div id="hiddenInputs"></div>
+
+                    <button type="submit" class="place-btn btn btn-sm btn-orange" name="action" value="create">
+                        <span style="font-size: 16px; font-weight: 600;">Place</span><br>
+                        <span style="font-size: 13px;">(<span id="finalPrice">0</span> VND)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* ===== Hàm hiển thị modal cảnh báo ===== */
+    function showAlertModal(message, isError = true) {
+        const modalEl = document.getElementById('alertModal');
+
+        const newModalEl = modalEl.cloneNode(true);
+        modalEl.parentNode.replaceChild(newModalEl, modalEl);
+
+        const msgEl = newModalEl.querySelector('#alertMessage');
+        const header = newModalEl.querySelector('.modal-header');
+        const title = newModalEl.querySelector('.modal-title');
+
+        msgEl.textContent = message;
+
+        if (isError) {
+            header.classList.remove('bg-success');
+            header.classList.add('bg-danger');
+            title.textContent = 'Warning';
+        } else {
+            header.classList.remove('bg-danger');
+            header.classList.add('bg-success');
+            title.textContent = 'Success';
+
+            newModalEl.addEventListener('hidden.bs.modal', () => {
+                window.location.href = '/order/create';
+            }, { once: true }); // 'once: true' để nó chỉ chạy 1 lần
+        }
+
+        const modal = new bootstrap.Modal(newModalEl);
+        modal.show();
+    }
+
+    /* ===== Xử lý Submit Order (AJAX) - ĐÃ CẬP NHẬT ===== */
+    function handleOrderSubmit(event) {
+        event.preventDefault();
+        updateHiddenInputs();
+        const form = event.target;
+        const submitButton = form.querySelector('button[name="action"][value="create"]');
+        const orderItems = document.querySelectorAll(".order-item");
+        if (orderItems.length === 0) {
+            showAlertModal('Please select at least one product before placing the order.');
+            return;
+        }
+        const productInputs = document.querySelectorAll("input[name='productIds']");
+        if (productInputs.length === 0) {
+            showAlertModal('No products found in form. Please re-add items.');
+            return;
+        }
+        const formData = new FormData(form);
+        formData.append(submitButton.name, submitButton.value);
+        fetch(form.getAttribute('action'), {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: formData
+        })
+            .then(res => {
+                if (res.redirected) {
+                    showAlertModal('Your session may have expired. Reloading page...', true);
+                    setTimeout(() => window.location.reload(), 2000);
+                    return null;
+                }
+                if (!res.ok) {
+                    showAlertModal(`Server Error (${res.status}). Please check the server log.`, true);
+                    return null;
+                }
+                return res.text();
+            })
+            .then(html => {
+                if (html === null) return;
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const errorEl = doc.querySelector('.alert-danger');
+                if (errorEl) {
+                    showAlertModal(errorEl.textContent, true);
+                    return;
+                }
+                const successEl = doc.querySelector('.alert-success');
+                if (successEl) {
+                    // Chỉ cần gọi modal, nó sẽ tự tải lại trang khi đóng
+                    showAlertModal(successEl.textContent, false);
+                } else {
+                    showAlertModal('An unknown error occurred. (No alert found)', true);
+                }
+            })
+            .catch(err => {
+                console.error('Submit error:', err);
+                showAlertModal('Failed to submit order. Check connection.', true);
+            });
+    }
+
+    /* ========== Gắn listener cho các nút trong Order Item ========== */
+    function addListenersToOrderItem(item) {
+        const qtyInput = item.querySelector(".item-qty-input");
+        const removeBtn = item.querySelector(".btn-remove-item");
+        const maxStock = parseInt(item.getAttribute('data-max-stock')) || 999;
+        removeBtn.addEventListener("click", () => {
+            item.remove();
+            updateTotal();
+            validateAndHandlePoints(document.getElementById('pointsUsed'), true);
+        });
+        qtyInput.addEventListener("change", () => {
+            let qty = parseInt(qtyInput.value);
+            if (isNaN(qty) || qty <= 0) {
+                item.remove();
+            } else if (qty > maxStock) {
+                showAlertModal(`Stock limit is ${maxStock}. Setting quantity to max.`);
+                qtyInput.value = maxStock;
+            } else {
+                qtyInput.value = qty;
+            }
+            updateTotal();
+            validateAndHandlePoints(document.getElementById('pointsUsed'), true);
+        });
+        qtyInput.addEventListener("input", () => {
+            if (qtyInput.value && parseInt(qtyInput.value) < 1) {
+                qtyInput.value = 1;
+            }
+            if (qtyInput.value && parseInt(qtyInput.value) > maxStock) {
+                qtyInput.value = maxStock;
+            }
+        });
+    }
+
+
+    /* ========== Logic Thêm/Cập nhật Sản phẩm (trả về true/false) ========== */
+    function addProductToOrder(productId, name, price, img, quantityToAdd, maxStock) {
+        if (isNaN(quantityToAdd) || quantityToAdd <= 0) {
+            showAlertModal("Invalid quantity.");
+            return false;
+        }
+        const orderList = document.querySelector(".order-list");
+        let existingItem = Array.from(orderList.querySelectorAll(".order-item"))
+            .find(item => item.getAttribute("data-product-id") === productId);
+        const currentQtyInCart = existingItem ? parseInt(existingItem.querySelector(".item-qty-input").value) : 0;
+        if (currentQtyInCart + quantityToAdd > maxStock) {
+            showAlertModal(`Cannot add. Stock limit is ${maxStock}. (You already have ${currentQtyInCart} in cart).`);
+            return false;
+        }
+        if (existingItem) {
+            existingItem.querySelector(".item-qty-input").value = currentQtyInCart + quantityToAdd;
+        } else {
+            const item = document.createElement("div");
+            item.classList.add("order-item");
+            item.setAttribute("data-product-id", productId);
+            item.setAttribute("data-max-stock", maxStock);
+            item.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;">
+                <img src="${img}" alt="${name}">
+                <span class="item-name">${name}</span>
+            </div>
+            <div style="text-align:right;">
+                <div style="display:flex;align-items:center;justify-content:flex-start;gap:5px;">
+                    <input type="number" class="item-qty-input" value="${quantityToAdd}" min="1"
+                           style="width: 50px; text-align: center; font-weight: 600; padding: 2px 4px; height: 28px; border: 1px solid #ccc; border-radius: 4px;">
+                    <button type="button" class="btn-remove-item"
+                        style="border:1px solid #aaa; background-color:#e9ecef;
+                               border-radius:5px; width:28px; height:28px;
+                               font-weight:bold; line-height:1;">&times;</button>
+                    <span class="item-price" data-price="${price}" style="display:none;"></span>
+                    <span class="item-unit-price" style="font-size: 16px; color: #555; margin-left: 4px;"> ${price.toLocaleString()} VND </span>
+                </div>
+                <div><input type="text" class="item-note form-control form-control-sm mt-1" placeholder="Note..." style="width:220px;"></div>
+            </div>`;
+            orderList.appendChild(item);
+            addListenersToOrderItem(item);
+        }
+        updateTotal();
+        validateAndHandlePoints(document.getElementById('pointsUsed'), true);
+        return true;
+    }
+
+
+    /* ========== [SỬA] Gắn sự kiện cho product cards ========== */
+    function attachProductCardListeners() {
+        document.querySelectorAll(".product-card").forEach(card => {
+            card.replaceWith(card.cloneNode(true));
+        });
+
+        document.querySelectorAll(".product-card").forEach(card => {
+
+            const addButton = card.querySelector('.btn-add-product');
+
+            // --- Listener 1: Nút Dấu Cộng (+) ---
+            if (addButton) {
+                addButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const name = card.querySelector(".product-name").textContent.trim();
+                    const priceText = card.querySelector(".product-price").textContent.trim();
+                    const price = parseFloat(priceText.replace(/[^\d.]/g, ""));
+                    const img = card.querySelector("img").src;
+                    const productId = card.getAttribute("data-product-id");
+                    const stock = parseInt(card.getAttribute("data-product-stock") || 0);
+
+                    if (stock <= 0) {
+                        showAlertModal("This product is out of stock.");
+                        return;
+                    }
+                    addProductToOrder(productId, name, price, img, 1, stock);
+                });
+            }
+
+            // --- Listener 2: Toàn bộ thẻ Card (để mở Modal) ---
+            card.addEventListener('click', () => {
+                // 1. Lấy dữ liệu (Giữ nguyên)
+                const name = card.querySelector(".product-name").textContent.trim();
+                const priceText = card.querySelector(".product-price").textContent.trim();
+                const price = parseFloat(priceText.replace(/[^\d.]/g, ""));
+                const img = card.querySelector("img").src;
+                const productId = card.getAttribute("data-product-id");
+                const stock = card.getAttribute("data-product-stock") || 0;
+                const description = card.getAttribute("data-product-description") || "No description available.";
+                const category = card.getAttribute("data-product-category") || "N/A";
+
+                // 2. Đổ dữ liệu vào Modal (Giữ nguyên)
+                document.getElementById('modalProductName').textContent = name;
+                document.getElementById('modalProductImage').src = img;
+                document.getElementById('modalProductPriceValue').textContent = price.toLocaleString() + " VND";
+                document.getElementById('modalProductCategoryValue').textContent = category;
+                const totalStock = parseInt(stock);
+                const stockEl = document.getElementById('modalProductStock');
+                stockEl.textContent = totalStock;
+                document.getElementById('modalProductDescription').textContent = (description === "null" || description === "") ? "No description available." : description;
+
+                // 3. Tìm số lượng đã có trong giỏ
+                let existingItem = Array.from(document.querySelectorAll(".order-item"))
+                    .find(item => item.getAttribute("data-product-id") === productId);
+
+                const currentQtyInCart = existingItem ? parseInt(existingItem.querySelector(".item-qty-input").value) : 0;
+
+                // 4. Tính toán số lượng còn lại có thể thêm
+                const remainingStock = totalStock - currentQtyInCart;
+
+                // 5. Cập nhật Input của Modal
+                const qtyInput = document.getElementById('modalQuantityInput');
+
+                // Đặt max = số lượng còn lại (ví dụ: 29)
+                qtyInput.setAttribute('max', remainingStock);
+
+                // Xử lý trường hợp không còn gì để thêm
+                if (remainingStock <= 0) {
+                    qtyInput.value = 0;
+                    qtyInput.disabled = true; // Vô hiệu hóa input
+                } else {
+                    qtyInput.value = 1; // Mặc định là 1
+                    qtyInput.disabled = false; // Bật input
+                }
+
+                // 6. Gắn dữ liệu vào nút "Add to Order"
+                const modalAddButton = document.getElementById('modalAddToCartButton');
+                modalAddButton.setAttribute('data-product-id', productId);
+                modalAddButton.setAttribute('data-name', name);
+                modalAddButton.setAttribute('data-price', price);
+                modalAddButton.setAttribute('data-img', img);
+                // Nút này VẪN lưu TỔNG stock (30), để hàm addProductToOrder tự kiểm tra
+                modalAddButton.setAttribute('data-max-stock', totalStock);
+
+                // 7. Mở Modal
+                const productModal = new bootstrap.Modal(document.getElementById('productDetailModal'));
+                productModal.show();
+            });
+        });
+    }
+
+    /* ========== Tính tổng tiền ========== */
+    function updateTotal() {
+        const orderItems = document.querySelectorAll(".order-item");
+        let subtotal = 0;
+        orderItems.forEach(item => {
+            const qtyInput = item.querySelector(".item-qty-input");
+            let qty = parseInt(qtyInput.value);
+            if (isNaN(qty) || qty < 1) {
+                qty = 0;
+            }
+            const price = parseFloat(item.querySelector(".item-price").getAttribute("data-price"));
+            subtotal += qty * price;
+        });
+        const voucherSelect = document.querySelector('select[name="voucherId"]');
+        let currentVoucherIsValid = true;
+        for (const option of voucherSelect.options) {
+            const minOrder = parseFloat(option.getAttribute('data-min-order')) || 0;
+            if (option.value === "") {
+                option.style.display = 'block';
+                continue;
+            }
+            if (subtotal < minOrder) {
+                option.style.display = 'none';
+            } else {
+                option.style.display = 'block';
+            }
+            if (option.selected && option.style.display === 'none') {
+                currentVoucherIsValid = false;
+            }
+        }
+        if (!currentVoucherIsValid) {
+            voucherSelect.value = "";
+        }
+        const selectedOption = voucherSelect.options[voucherSelect.selectedIndex];
+        const voucherTypeAttr = selectedOption.getAttribute('data-type') || 'NONE';
+        const voucherType = voucherTypeAttr.toUpperCase();
+        const voucherValue = parseFloat(selectedOption.getAttribute('data-value')) || 0;
+        let voucherDiscount = 0;
+        let voucherText = "- 0 VND";
+        if (voucherType === 'PERCENT' || voucherType === '%') {
+            voucherDiscount = Math.ceil(subtotal * (voucherValue / 100.0));
+            voucherText = `- ${voucherValue}%`;
+        } else if (voucherType === 'AMOUNT' || voucherType === 'VND') {
+            voucherDiscount = voucherValue;
+            voucherText = `- ${voucherDiscount.toLocaleString()} VND`;
+        }
+        const pointsInput = document.getElementById('pointsUsed');
+        const pointsUsed = parseInt(pointsInput.value) || 0;
+        const pointsDiscount = pointsUsed * 1000.0;
+        let finalTotal = subtotal - voucherDiscount - pointsDiscount;
+        if (finalTotal < 0) {
+            finalTotal = 0;
+        }
+        if (finalTotal > 0) {
+            finalTotal = Math.ceil(finalTotal / 1000) * 1000;
+        }
+        document.getElementById("totalPrice").textContent = subtotal.toLocaleString() + " VND";
+        document.getElementById("displayVoucherDiscount").textContent = voucherText;
+        document.getElementById("displayPointsDiscount").textContent = `- ${pointsDiscount.toLocaleString()} VND`;
+        document.getElementById("finalPrice").textContent = finalTotal.toLocaleString();
+        updateHiddenInputs();
+    }
+
+    /* ===== Các hàm Helper (getMaxPointsInfo, v.v...) ===== */
+    function getMaxPointsInfo() {
+        const input = document.getElementById('pointsUsed');
+        const customerMaxPoints = (input ? parseInt(input.getAttribute('data-max')) : 0) || 0;
+        const orderItems = document.querySelectorAll(".order-item");
+        let subtotal = 0;
+        orderItems.forEach(item => {
+            const qty = parseInt(item.querySelector(".item-qty-input").value);
+            const price = parseFloat(item.querySelector(".item-price").getAttribute("data-price"));
+            subtotal += qty * price;
+        });
+        const voucherSelect = document.querySelector('select[name="voucherId"]');
+        const selectedOption = voucherSelect.options[voucherSelect.selectedIndex];
+        const voucherTypeAttr = selectedOption.getAttribute('data-type') || 'NONE';
+        const voucherType = voucherTypeAttr.toUpperCase();
+        const voucherValue = parseFloat(selectedOption.getAttribute('data-value')) || 0;
+        let voucherDiscount = 0;
+        if (voucherType === 'PERCENT' || voucherType === '%') {
+            voucherDiscount = Math.ceil(subtotal * (voucherValue / 100.0));
+        } else if (voucherType === 'AMOUNT' || voucherType === 'VND') {
+            voucherDiscount = voucherValue;
+        }
+        let priceToPay = subtotal - voucherDiscount;
+        if (priceToPay < 0) priceToPay = 0;
+        const orderMaxPointsNeeded = Math.ceil(priceToPay / 1000.0);
+        const trueMaxPoints = Math.min(customerMaxPoints, orderMaxPointsNeeded);
+        return {
+            customerMaxPoints: customerMaxPoints,
+            orderMaxPointsNeeded: orderMaxPointsNeeded,
+            trueMaxPoints: trueMaxPoints
+        };
+    }
+
+    function validateAndHandlePoints(input, silent = false) {
+        if (!input) return;
+        let pointsUsed_Input = parseInt(input.value) || 0;
+        if (pointsUsed_Input < 0) {
+            pointsUsed_Input = 0;
+            input.value = 0;
+        }
+        const pointsInfo = getMaxPointsInfo();
+        if (pointsUsed_Input > pointsInfo.trueMaxPoints) {
+            if (pointsInfo.customerMaxPoints < pointsInfo.orderMaxPointsNeeded && pointsUsed_Input > pointsInfo.customerMaxPoints) {
+                if (!silent) {
+                    showAlertModal(`Warning: You only have ${pointsInfo.customerMaxPoints} points.`);
+                }
+                input.value = pointsInfo.customerMaxPoints;
+            } else {
+                if (!silent) {
+                    showAlertModal(`Warning: This order only requires ${pointsInfo.orderMaxPointsNeeded} points.`);
+                }
+                input.value = pointsInfo.orderMaxPointsNeeded;
+            }
+        } else {
+            input.value = pointsUsed_Input;
+        }
+        updateLockState();
+        updateTotal();
+    }
+
+
+    function updateLockState() {
+        const orderPanel = document.querySelector('.order-panel');
+        if (!orderPanel) return;
+        const phoneInput = orderPanel.querySelector('input[name="customerPhone"]');
+        const voucherSelect = orderPanel.querySelector('select[name="voucherId"]');
+        const pointsInput = orderPanel.querySelector('#pointsUsed');
+        const maxPointsBtn = orderPanel.querySelector('#maxPointsButton');
+
+        if (!phoneInput || !voucherSelect || !pointsInput || !maxPointsBtn) return;
+
+        const voucherHasValue = voucherSelect.value !== "";
+        const pointsHaveValue = parseInt(pointsInput.value) > 0;
+        const customerHasPoints = (parseInt(pointsInput.getAttribute('data-max')) || 0) > 0;
+
+        phoneInput.disabled = false;
+
+        let redeemShouldBeDisabled = !customerHasPoints;
+        let voucherShouldBeDisabled = false;
+
+        if (voucherHasValue) {
+            redeemShouldBeDisabled = true;
+        } else if (pointsHaveValue) {
+            voucherShouldBeDisabled = true;
+        }
+
+        voucherSelect.disabled = voucherShouldBeDisabled;
+
+        if (pointsInput) {
+            pointsInput.disabled = redeemShouldBeDisabled;
+        }
+
+        if (maxPointsBtn) {
+            maxPointsBtn.disabled = redeemShouldBeDisabled;
+        }
+    }
+
+    /* ===== Các hàm AJAX (performSearch, fetchAndReplace) ===== */
+    function performSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        let url = '/order/create?page=1';
+        if (selectedCategoryId && selectedCategoryId !== "0") {
+            url += `&categoryId=${selectedCategoryId}`;
+        }
+        if (query) {
+            url += `&query=${encodeURIComponent(query)}`;
+        }
+        fetchAndReplace(url, selectedCategoryId);
+    }
+
+    function fetchAndReplace(url, categoryId) {
+        fetch(url, {credentials: 'same-origin'})
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newGrid = doc.querySelector('.menu-grid');
+                const newPagination = doc.querySelector('.pagination');
+                const curGrid = document.querySelector('.menu-grid');
+                const curPag = document.querySelector('.pagination');
+                if (curGrid && newGrid) curGrid.innerHTML = newGrid.innerHTML;
+                if (curPag && newPagination) curPag.innerHTML = newPagination.innerHTML;
+                const products = curGrid ? curGrid.querySelectorAll('.product-card') : [];
+                if (products.length === 0 && curGrid) {
+                    curGrid.innerHTML = `
+        <div class="text-center mt-5" style="font-size: 18px; color: #888;">
+            <i class="bi bi-emoji-frown" style="font-size: 32px;"></i>
+            <p>Not found</p>
+        </div>`;
+                    if (curPag) curPag.innerHTML = '';
+                }
+                selectedCategoryId = categoryId ? String(categoryId) : "0";
+                document.querySelectorAll('.category-button').forEach(button => {
+                    const buttonId = button.getAttribute('data-category-id');
+                    if (buttonId === selectedCategoryId) {
+                        button.classList.add('btn-custom-active');
+                        button.classList.remove('btn-custom-inactive');
+                    } else {
+                        button.classList.add('btn-custom-inactive');
+                        button.classList.remove('btn-custom-active');
+                    }
+                });
+                attachProductCardListeners();
+                history.pushState(null, '', url);
+            })
+            .catch(err => {
+                console.error('Fetch error:', err);
+                window.location.href = url;
+            });
+    }
+
+    // Biến global
+    let selectedCategoryId = "0";
+
+    /* ========== Phân trang AJAX (Menu) ========== */
+    document.addEventListener('click', function (e) {
+        const menuPanel = e.target.closest('.menu-panel');
+        if (!menuPanel) return;
+        const a = e.target.closest('.pagination a');
+        if (!a) return;
+        e.preventDefault();
+        const href = a.getAttribute('href');
+        fetchAndReplace(href, selectedCategoryId);
+    });
+
+    /* ========== DOM Ready (Chỉ gọi 1 lần duy nhất) ========== */
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const modalAddBtn = document.getElementById('modalAddToCartButton');
+        const modalQtyInput = document.getElementById('modalQuantityInput');
+
+        if (modalAddBtn && modalQtyInput) {
+
+            modalQtyInput.addEventListener('input', () => {
+                const maxStock = parseInt(modalQtyInput.getAttribute('max')) || 999;
+                let qty = parseInt(modalQtyInput.value);
+
+                if (modalQtyInput.value && qty < 1) {
+                    modalQtyInput.value = 1;
+                }
+
+                if (qty > maxStock) {
+                    modalQtyInput.value = maxStock;
+                }
+            });
+
+
+            modalAddBtn.addEventListener('click', () => {
+                const addButton = document.getElementById('modalAddToCartButton');
+                const productId = addButton.getAttribute('data-product-id');
+                const name = addButton.getAttribute('data-name');
+                const price = parseFloat(addButton.getAttribute('data-price'));
+                const img = addButton.getAttribute('data-img');
+                const quantityToAdd = parseInt(modalQtyInput.value);
+
+                const maxStock = parseInt(addButton.getAttribute('data-max-stock')) || 0;
+
+                if (isNaN(quantityToAdd) || quantityToAdd <= 0) {
+                    showAlertModal("Please enter a valid quantity.");
+                    return;
+                }
+
+                const success = addProductToOrder(productId, name, price, img, quantityToAdd, maxStock);
+
+                if (success) {
+                    const productModal = bootstrap.Modal.getInstance(document.getElementById('productDetailModal'));
+                    productModal.hide();
+                }
+            });
+        }
+
+
+        // Gắn sự kiện cho Menu
+        attachProductCardListeners();
+
+        // --- Gắn sự kiện cho nút Search ---
+        const searchBtn = document.getElementById('searchButton');
+        const searchInput = document.getElementById('searchInput');
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+        }
+
+        // --- Gắn sự kiện cho Category Buttons ---
+        const categoryContainer = document.getElementById('categoryButtons');
+        if (categoryContainer) {
+            const activeButton = categoryContainer.querySelector('.btn-custom-active');
+            selectedCategoryId = activeButton ? activeButton.getAttribute('data-category-id') : "0";
+            categoryContainer.addEventListener('click', function(e) {
+                const button = e.target.closest('.category-button');
+                if (!button) return;
+                selectedCategoryId = button.getAttribute('data-category-id');
+                document.querySelectorAll('.category-button').forEach(btn => {
+                    btn.classList.add('btn-custom-inactive');
+                    btn.classList.remove('btn-custom-active');
+                });
+                button.classList.add('btn-custom-active');
+                button.classList.remove('btn-custom-inactive');
+                performSearch();
+            });
+        }
+
+        // --- Gắn sự kiện Back/Forward ---
+        window.addEventListener('popstate', function () {
+            fetchAndReplace(location.href, null);
+        });
+
+        // --- EVENT DELEGATION CHO ORDER PANEL ---
+        const orderPanel = document.querySelector('.order-panel');
+        if (!orderPanel) return;
+        orderPanel.addEventListener('click', function (e) {
+            const checkBtn = e.target.closest('button[name="action"][value="check"]');
+            if (checkBtn) {
+                const phoneInput = orderPanel.querySelector('input[name="customerPhone"]');
+                if (!phoneInput) return;
+                const phone = phoneInput.value.trim();
+                if (!phone) {
+                    showAlertModal('Please enter a phone number.');
+                    return;
+                }
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('action', 'check');
+                currentUrl.searchParams.set('customerPhone', phone);
+                const query = document.getElementById('searchInput')?.value || "";
+                if (query) {
+                    currentUrl.searchParams.set('query', query);
+                }
+                const url = currentUrl.href;
+                fetch(url, {method: 'GET', credentials: 'same-origin'})
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                        return res.text();
+                    })
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newCustomerInfo = doc.querySelector('.customer-info');
+                        const curCustomerInfo = document.querySelector('.customer-info');
+                        const newVoucher = doc.querySelector('.voucher');
+                        const curVoucher = document.querySelector('.voucher');
+                        const errorAlert = doc.querySelector('.alert-danger');
+                        const curError = document.querySelector('.alert-danger');
+                        if (curError) curError.remove();
+                        if (errorAlert) {
+                            showAlertModal(errorAlert.textContent);
+                        }
+                        if (curCustomerInfo && newCustomerInfo) {
+                            curCustomerInfo.innerHTML = newCustomerInfo.innerHTML;
+                        }
+                        if (curVoucher && newVoucher) {
+                            curVoucher.innerHTML = newVoucher.innerHTML;
+                        }
+                        const newPhoneVal = doc.querySelector('input[name="customerPhone"]')?.value;
+                        const currentPhoneInput = orderPanel.querySelector('input[name="customerPhone"]');
+                        if (currentPhoneInput && newPhoneVal !== undefined) {
+                            currentPhoneInput.value = newPhoneVal;
+                        }
+                        updateLockState();
+                        updateTotal();
+                    })
+                    .catch(err => {
+                        console.error('Fetch error:', err);
+                        showAlertModal('Failed to load customer info. Check connection.');
+                    });
+                return;
+            }
+            const maxPointsBtn = e.target.closest('#maxPointsButton');
+            if (maxPointsBtn) {
+                const pointsInput = document.getElementById('pointsUsed');
+                if (!pointsInput) return;
+                const pointsInfo = getMaxPointsInfo();
+                pointsInput.value = pointsInfo.trueMaxPoints;
+                validateAndHandlePoints(pointsInput, true);
+                return;
+            }
+        });
+        orderPanel.addEventListener('change', function (e) {
+            const voucherSelect = e.target.closest('select[name="voucherId"]');
+            const pointsInput = e.target.closest('input[name="pointsUsed"]');
+            if (voucherSelect) {
+                updateLockState();
+                updateTotal();
+                validateAndHandlePoints(document.getElementById('pointsUsed'), true);
+            }
+            if (pointsInput) {
+                validateAndHandlePoints(pointsInput, false);
+            }
+        });
+        orderPanel.addEventListener('input', function (e) {
+            const phoneInput = e.target.closest('input[name="customerPhone"]');
+            if (phoneInput) {
+                updateLockState();
+            }
+        });
+
+        updateLockState();
+        updateTotal();
+
+    });
+
+    /* ========== Hidden inputs ========== */
+    function updateHiddenInputs() {
+        const container = document.getElementById("hiddenInputs");
+        container.innerHTML = "";
+        const orderItems = document.querySelectorAll(".order-item");
+        orderItems.forEach(item => {
+            const qty = parseInt(item.querySelector(".item-qty-input").value);
+            const productId = item.getAttribute("data-product-id");
+            const note = item.querySelector(".item-note").value;
+            if (!productId || productId === "null") {
+                console.warn("Skipping item with invalid product ID.");
+                return;
+            }
+            const hiddenProduct = document.createElement("input");
+            hiddenProduct.type = "hidden";
+            hiddenProduct.name = "productIds";
+            hiddenProduct.value = productId;
+            const hiddenQty = document.createElement("input");
+            hiddenQty.type = "hidden";
+            hiddenQty.name = "quantities";
+            hiddenQty.value = qty;
+            const hiddenNote = document.createElement("input");
+            hiddenNote.type = "hidden";
+            hiddenNote.name = "notes";
+            hiddenNote.value = note;
+            container.appendChild(hiddenProduct);
+            container.appendChild(hiddenQty);
+            container.appendChild(hiddenNote);
+        });
+    }
+
+    /* ========== Validate đặt hàng ========== */
+    function validateOrderForm() {
+        updateHiddenInputs();
+        const orderItems = document.querySelectorAll(".order-item");
+        if (orderItems.length === 0) {
+            showAlertModal('Please select at least one product before placing the order.');
+            return false;
+        }
+        const productInputs = document.querySelectorAll("input[name='productIds']");
+        if (productInputs.length === 0) {
+            showAlertModal('No products found in form. Please re-add items.');
+            return false;
+        }
+        return true;
+    }
+</script>
+
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content border-black">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="alertModalLabel">
+                    Warning
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center fs-5" id="alertMessage">
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalProductName">Product Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <img id="modalProductImage" src="" alt="Product Image" class="img-fluid rounded">
+                    </div>
+
+                    <div class="col-md-7 d-flex flex-column">
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <strong>PRICE</strong>
+                                <p id="modalProductPriceValue" class="modal-price fw-bold mb-0">0 VND</p>
+                            </div>
+                            <div class="col-6">
+                                <strong>CATEGORY</strong>
+                                <p id="modalProductCategoryValue" class="mb-0">N/A</p>
+                            </div>
+                        </div>
+                        <hr class="my-2">
+
+                        <strong>DESCRIPTION</strong>
+                        <p id="modalProductDescription" class="mt-1" style="font-size: 15px; color: #555; flex-grow: 1;">
+                            No description available.
+                        </p>
+                        <hr class="my-2">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+
+                            <div class="d-flex align-items-center gap-2">
+                                <strong>STOCK: </strong>
+                                <span id="modalProductStock" style="margin-left: 5px;">0</span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <strong>QUANTITY</strong>
+                                <input type="number"
+                                       class="form-control"
+                                       id="modalQuantityInput"
+                                       value="1"
+                                       min="1"
+                                       style="width: 80px; text-align: center;">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-orange" id="modalAddToCartButton">
+                    <i class="bi bi-cart-plus"></i> Add to Order
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+</body>
+</html>

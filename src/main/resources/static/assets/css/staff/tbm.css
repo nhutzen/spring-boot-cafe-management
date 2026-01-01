@@ -1,0 +1,142 @@
+:root {
+    --brand-primary: #ffffff;
+    --brand-white: #FFFFFF;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--brand-light-gray);
+    color: var(--brand-dark);
+}
+
+/* --- Navbar --- */
+.navbar {
+    background-color: var(--brand-white) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary) !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-primary) !important;
+}
+
+/* --- Card Style --- */
+.card {
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--brand-white);
+}
+
+/* --- Button Styles --- */
+.btn-brand-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem; /* 8px */
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-brand-primary:hover {
+    background-color: #E66E00;
+    border-color: #E66E00;
+    color: var(--brand-white);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+}
+
+/* --- Form Input Style --- */
+.form-control, .form-select {
+    border-radius: 0.5rem; /* 8px */
+    padding: 0.6rem 1rem;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    height: auto;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Table Styling --- */
+.table {
+    vertical-align: middle;
+}
+
+.table thead th {
+    font-weight: 600;
+    color: var(--brand-gray);
+    border-top: none;
+}
+
+.table tbody tr:hover {
+    background-color: #fffaf5; /* Light orange */
+}
+
+/* Specific colors for table status select */
+.form-select.status-available {
+    color: #198754 !important;
+    font-weight: 600;
+}
+
+.form-select.status-booked {
+    color: #ffc107 !important;
+    font-weight: 600;
+}
+
+.form-select.status-occupied {
+    color: #dc3545 !important;
+    font-weight: 600;
+}
+
+/* --- Notification Toast (Replaces alert()) --- */
+.notification-toast {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    max-width: 350px;
+    z-index: 1056; /* Above modals */
+    border-radius: 0.5rem;
+    padding: 1rem;
+    color: var(--brand-white);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(100%);
+    transition: all 0.3s ease-in-out;
+}
+
+.notification-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.notification-toast.bg-success {
+    background-color: #198754;
+}
+
+.notification-toast.bg-danger {
+    background-color: #dc3545;
+}

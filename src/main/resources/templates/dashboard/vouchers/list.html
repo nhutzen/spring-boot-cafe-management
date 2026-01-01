@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Vouchers',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/vouchers/list.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+<!-- Main Content -->
+<div class="container my-5">
+
+    <h1 class="fw-bold mb-3" th:text="${error}">Voucher Management</h1>
+
+    <!-- Header Card: Title, Search, and Actions -->
+    <div class="card p-4 mb-4">
+        <div class="row g-3">
+            <!-- Title -->
+            <div class="col-12 col-md-4">
+                <h2 class="fw-bold mb-0">Voucher List</h2>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-12 col-md-8 d-flex justify-content-md-end gap-2">
+                <a th:href="@{/dashboard/vouchers/deleted-list}" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-trash me-1"></i> Trash
+                </a>
+                <a th:href="@{/dashboard/vouchers/create}" class="btn btn-brand-primary">
+                    <i class="fa-solid fa-plus me-1"></i> Add New Voucher
+                </a>
+            </div>
+            <!-- Search Bar -->
+            <div class="col-12 mt-3">
+                <form class="d-flex" role="search" th:action="@{/dashboard/vouchers}" method="get">
+                    <input class="form-control me-2" type="search" name="keyword"
+                           placeholder="Search Voucher's name..." th:value="${keyword}" aria-label="Search">
+                    <button class="btn btn-brand-primary" type="submit" style="white-space: nowrap;">Search</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Vouchers Table Card -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th class="p-3" scope="col">N.O</th>
+                        <th class="p-3" scope="col">Name</th>
+                        <th class="p-3" scope="col">Code</th>
+                        <th class="p-3" scope="col">Quantity</th>
+                        <th class="p-3" scope="col">End Date</th>
+                        <th class="p-3" scope="col">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${voucher.active}" th:each="voucher, iterStat : ${vouchers}"
+                        th:object="${voucher}">
+                        <td class="p-3" th:text="${iterStat.count}" scope="row"></td>
+                        <td class="p-3" th:text="*{voucherName}"></td>
+                        <td class="p-3"><span class="badge bg-secondary text-dark bg-opacity-10"
+                                              th:text="*{code}"></span></td>
+                        <td class="p-3" th:text="*{quantity}"></td>
+                        <td class="p-3" th:text="*{#temporals.format(endDate, 'yyyy / MM / dd')}"></td>
+                        <td class="p-3">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        th:onclick="openDetailPopup([[${voucher.voucherId}]], [[${voucher.code}]], [[${voucher.voucherName}]], [[${voucher.minOrderValue}]], [[${voucher.discountValue}]], [[${voucher.discountType}]], [[${voucher.quantity}]], [[${voucher.startDate}]], [[${voucher.endDate}]], [[${voucher.discountType}]])">
+                                    Details
+                                </button>
+                                <a th:href="@{/dashboard/vouchers/edit/{id}(id=*{voucherId})}" type="button"
+                                   class="btn btn-sm btn-outline-primary">Edit</a>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        th:onclick="openDeletePopup([[${voucher.voucherId}]] , [[${voucher.code}]], [[${voucher.voucherName}]], [[${voucher.signature}]])">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Empty State -->
+                    <tr th:if="${vouchers == null or #lists.isEmpty(vouchers)}">
+                        <td colspan="6" class="text-center p-5">
+                            <i class="fa-solid fa-tags fa-2x text-muted mb-3"></i>
+                            <p class="mb-0 text-muted">No active vouchers found.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+<!-- Delete Voucher popup -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Voucher</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <p><strong>Voucher Code:</strong> <span id="voucherCode"></span></p>
+                <p><strong>Voucher Name:</strong> <span id="voucherName"></span></p>
+                <div class="alert alert-danger mt-3" role="alert">
+                    Are you sure you want to delete this voucher?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form th:action="@{/dashboard/vouchers/remove}" method="post">
+                    <input type="hidden" name="voucherId" id="deleteVoucherId">
+                    <input type="hidden" name="sig" id="deleteVoucherSig">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Voucher popup -->
+<div class="modal fade" id="detail" tabindex="-1" aria-labelledby="detailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailLabel">Voucher Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Voucher Code:</strong> <span id="detailCode"></span></p>
+                <p><strong>Voucher Name:</strong> <span id="detailName"></span></p>
+                <p><strong>Min Order Value:</strong> <span id="detailMin"></span></p>
+                <p><strong>Discount Value:</strong> <span id="detailValue"></span></p>
+                <p><strong>Discount Type:</strong> <span id="detailType"></span></p>
+                <p><strong>Quantity:</strong> <span id="detailQuantity"></span></p>
+                <p><strong>Start Date:</strong> <span id="detailStart"></span></p>
+                <p><strong>End Date:</strong> <span id="detailEnd"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<!--JS of DeletePopup-->
+<script>
+    function openDeletePopup(id, code, name, sig) {
+        document.getElementById("voucherCode").textContent = code;
+        document.getElementById("voucherName").textContent = name;
+        document.getElementById("deleteVoucherId").value = id;
+        document.getElementById("deleteVoucherSig").value = sig;
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+</script>
+
+<!--JS of DetailPopup-->
+<script>
+    function openDeletePopup(id, code, name, sig) {
+        document.getElementById("voucherCode").textContent = code;
+        document.getElementById("voucherName").textContent = name;
+        document.getElementById("deleteVoucherId").value = id;
+        document.getElementById("deleteVoucherSig").value = sig;
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+
+    // --- HÀM HELPER MỚI ĐỂ FORMAT NGÀY ---
+    function formatDateCustom(dateString) {
+        // Xử lý nếu ngày bị null hoặc không hợp lệ
+        if (!dateString) return "N/A";
+
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return dateString; // Trả về chuỗi gốc nếu không thể parse
+        }
+
+        const year = date.getFullYear();
+        // getMonth() trả về 0-11, nên + 1.
+        // .padStart(2, '0') để thêm '0' vào trước nếu là 1 số (ví dụ: 9 -> 09)
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        // Trả về định dạng bạn muốn
+        return `${year} / ${month} / ${day}`;
+    }
+
+    // --- KẾT THÚC HÀM HELPER ---
+
+
+    function openDetailPopup(id, code, name, minOrderValue, discountValue, discountType, quantity, startDate, endDate) {
+        document.getElementById("detailCode").textContent = code;
+        document.getElementById("detailName").textContent = name;
+        document.getElementById("detailMin").textContent = minOrderValue;
+        document.getElementById("detailValue").textContent = discountValue;
+        document.getElementById("detailType").textContent = discountType;
+        document.getElementById("detailQuantity").textContent = quantity;
+
+        // SỬ DỤNG HÀM HELPER MỚI
+        document.getElementById("detailStart").textContent = formatDateCustom(startDate);
+        document.getElementById("detailEnd").textContent = formatDateCustom(endDate);
+
+        const modal = new bootstrap.Modal(document.getElementById('detail'));
+        modal.show();
+    }
+</script>
+
+</body>
+</html>

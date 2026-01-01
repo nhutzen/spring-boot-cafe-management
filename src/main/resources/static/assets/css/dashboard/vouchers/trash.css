@@ -1,0 +1,106 @@
+:root {
+    --brand-primary: #FF7A00;
+    --brand-white: #FFFFFF;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+    --brand-primary-light: #fffaf5; /* Light orange for hover */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--brand-light-gray);
+    color: var(--brand-dark);
+}
+
+/* --- Navbar --- */
+.navbar {
+    background-color: var(--brand-white) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary) !important;
+}
+
+.navbar .nav-link {
+    color: var(--brand-dark) !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-primary) !important;
+}
+
+/* --- Card Style --- */
+.card {
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--brand-white);
+}
+
+/* --- Button Styles --- */
+.btn {
+    border-radius: 0.5rem; /* 8px */
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.35rem;
+}
+
+.btn-brand-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+}
+
+.btn-brand-primary:hover {
+    background-color: #E66E00;
+    border-color: #E66E00;
+    color: var(--brand-white);
+}
+
+.btn-outline-secondary {
+    border-color: #ced4da;
+    color: var(--brand-dark);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--brand-light-gray);
+    border-color: #ced4da;
+    color: var(--brand-dark);
+}
+
+/* --- Table Style --- */
+.table {
+    vertical-align: middle;
+    border-color: #dee2e6;
+}
+
+.table thead {
+    background-color: var(--brand-light-gray);
+    color: var(--brand-dark);
+}
+
+.table th {
+    font-weight: 600;
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: var(--brand-primary-light);
+    color: var(--brand-dark);
+}
+
+/* --- Modal Rounded --- */
+.modal-content {
+    border-radius: 0.75rem; /* 12px */
+    border: none;
+}

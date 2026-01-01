@@ -1,0 +1,151 @@
+/* == :root định nghĩa các biến màu chủ đạo == */
+:root {
+    --color-primary: #FF7A00; /* Cam chủ đạo */
+    --color-primary-dark: #E06C00; /* Cam đậm hơn khi hover */
+    --color-white: #FFFFFF;
+    --color-background: #f8f9fa; /* Một màu xám rất nhạt cho nền */
+    --color-text-dark: #212529; /* Màu text chính */
+    --color-text-muted: #6c757d; /* Màu text phụ */
+    --font-family-base: 'Inter', sans-serif;
+    --border-radius-base: 0.5rem; /* 8px - bo góc thống nhất */
+    --border-radius-lg: 0.75rem; /* 12px */
+    --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* == Style tổng thể == */
+body {
+    font-family: var(--font-family-base);
+    background-color: var(--color-background);
+    color: var(--color-text-dark);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* == Style cho Card (Thống nhất) == */
+.card {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-base);
+    height: 100%;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* == STYLES CHO BUTTON (Thống nhất) == */
+/* 1. Button chính (Màu cam) */
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--border-radius-base);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: var(--color-white);
+    box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+}
+
+/* 2. Button phụ (Viền cam) */
+.btn-outline-primary {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--border-radius-base);
+    border-width: 2px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+}
+
+/* Ghi đè màu warning (Nếu có) */
+.btn-warning {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white) !important;
+}
+
+.btn-warning:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+/* Style cho trang Profile (Không ảnh hưởng trang này)
+  Bạn có thể giữ lại hoặc xoá đi trong file CSS chung
+*/
+.profile-avatar { /* ... */
+}
+
+.profile-details-row { /* ... */
+}
+
+.profile-label { /* ... */
+}
+
+.profile-value { /* ... */
+}
+
+/* == Style riêng cho trang Point History == */
+.table {
+    /* Tăng tính "hiện đại" cho bảng.
+      Xoá viền trên cùng của <thead>
+    */
+    border-top: none;
+}
+
+.table > thead {
+    /* Làm cho header của bảng rõ ràng, dễ đọc hơn
+      thay vì chỉ in đậm
+    */
+    color: var(--color-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    border-bottom-width: 2px;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    z-index: 1;
+}
+
+.pagination .page-link {
+    color: var(--brand-primary);
+}
+
+.pagination .page-link:hover {
+    color: #E66E00;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--brand-gray);
+}

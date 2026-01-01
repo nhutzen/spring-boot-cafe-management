@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Edit Order History',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/order/edit-history.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<div class="main-content">
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <h2>Edit Order History</h2>
+
+        <form th:action="@{/order/edit-history}" method="get" class="d-flex gap-3 align-items-end"
+              sec:authorize="hasRole('ADMIN')">
+            <div>
+                <label for="startDate" class="form-label mb-0" style="font-weight: 500;">From Date:</label>
+                <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label for="endDate" class="form-label mb-0" style="font-weight: 500;">To Date:</label>
+                <input type="date" id="endDate" name="endDate" th:value="${endDate}" class="form-control form-control-sm">
+            </div>
+            <button type="submit" class="btn btn-orange btn-sm" style="height: 31px;">Filter</button>
+            <a th:href="@{/order/edit-history}" class="btn btn-secondary btn-sm" style="height: 31px;">Clear</a>
+        </form>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Created By (Cashier)</th>
+            <th>Table</th>
+            <th>Product(s)</th>
+            <th>Note</th>
+            <th>Status</th>
+            <th>Updated At</th>
+            <th>Made By (Barista)</th>
+            <th>Served By (Waiter)</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.orderId}"></td>
+
+            <td th:text="${order.staff != null ? order.staff.name : '-'}"></td>
+
+            <td th:text="${order.table != null ? order.table.tableId : 'Take-away'}"></td>
+
+            <td>
+                <ul style="list-style:none;padding:0;margin:0;">
+                    <li th:each="item : ${order.orderItems}"
+                        th:text="${item.product != null ? item.product.proName + ' × ' + item.quantity : '-'}"></li>
+                </ul>
+            </td>
+
+            <td>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li th:each="item : ${order.orderItems}"
+                        th:text="${item.note != null && item.note != '' ? item.note : '-'}"></li>
+                </ul>
+            </td>
+
+            <td th:text="${order.status}"></td>
+
+            <td th:text="${#temporals.format(order.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+
+            <td th:text="${order.madeBy != null ? order.madeBy.name : '-'}"></td>
+
+            <td th:text="${order.servedBy != null ? order.servedBy.name : '-'}"></td>
+        </tr>
+
+        <tr th:if="${orders == null or orders.isEmpty()}">
+            <td colspan="9" class="text-center text-muted py-3">
+                There are not any history orders.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <nav aria-label="Order pagination"
+         th:if="${orders != null and !orders.isEmpty() and totalPages > 0}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/order/edit-history(page=${currentPage - 1}, startDate=${startDate}, endDate=${endDate})}"
+                   aria-label="Previous">Prev</a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/order/edit-history(page=${i}, startDate=${startDate}, endDate=${endDate})}"
+                   th:text="${i}"></a>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/order/edit-history(page=${currentPage + 1}, startDate=${startDate}, endDate=${endDate})}"
+                   aria-label="Next">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<div th:insert="~{layout/footer}"></div>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule</title>
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .shift-cell {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .role-cell {
+            background-color: #e9ecef;
+        }
+
+        .week-selector {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .select-label {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            border-radius: 4px 4px 0 0;
+            display: inline-block;
+            margin-bottom: -1px;
+        }
+
+        .year-select, .week-select {
+            border-radius: 0 4px 4px 4px;
+            border: 2px solid #6c757d;
+            padding: 8px 12px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .year-select {
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: bold;
+        }
+
+        .week-select {
+            background-color: #ffffff;
+            color: #000000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-4">
+    <h2 class="mb-4">Schedule Management</h2>
+
+    <!-- Form chọn tuần theo format mới -->
+    <div class="week-selector">
+        <form class="row g-3 align-items-end" method="get" th:action="@{/schedule}">
+            <!-- Year Selector -->
+            <div class="col-md-3">
+                <div>
+                    <span class="select-label">YEAR</span>
+                </div>
+                <select class="form-select year-select" id="yearSelect" name="year" required>
+                    <option th:each="y : ${#numbers.sequence(currentYear - 2, currentYear)}"
+                            th:selected="${y == selectedYear or (selectedYear == null and y == currentYear)}"
+                            th:text="${y}"
+                            th:value="${y}">
+                    </option>
+                </select>
+
+            </div>
+
+            <!-- Week Selector -->
+            <div class="col-md-4">
+                <div>
+                    <span class="select-label">WEEK</span>
+                </div>
+                <select class="form-select week-select" id="weekSelect" name="weekRange" required>
+                    <!-- Options sẽ được tạo bằng JavaScript -->
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">
+                    View Schedule
+                </button>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-secondary w-100" onclick="setCurrentWeek()" type="button">
+                    This Week
+                </button>
+            </div>
+        </form>
+
+        <!-- Hiển thị range đã chọn -->
+        <div class="mt-3" th:if="${startDate != null and endDate != null}">
+            <div class="alert alert-info mb-0">
+                <strong>Viewing:</strong>
+                <span th:text="${#temporals.format(startDate, 'dd/MM/yyyy')}"></span>
+                -
+                <span th:text="${#temporals.format(endDate, 'dd/MM/yyyy')}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng schedule -->
+    <div th:if="${schedule != null and !schedule.isEmpty()}">
+        <table class="table table-bordered text-center align-middle bg-white">
+            <thead class="table-light">
+            <tr>
+                <th>Shift</th>
+                <th>Role</th>
+                <th th:each="date : ${dates}" th:text="${#temporals.format(date, 'EEE (dd/MM)')}"></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <!-- Lap qua tung shift -->
+            <th:block th:each="shiftEntry : ${schedule}">
+                <!-- Lap tung role trong shift -->
+                <th:block th:each="roleEntry, roleStat : ${shiftEntry.value}">
+                    <tr>
+                        <!-- gop hang theo shift -->
+                        <td th:if="${roleStat.index == 0}"
+                            th:text="${shiftEntry.key}"
+                            th:rowspan="${shiftEntry.value.size()}"
+                            class="shift-cell"></td>
+
+                        <!-- ten role  -->
+                        <td class="role-cell" th:text="${roleEntry.key}"></td>
+
+
+                        <!-- hien thi tung ngay  -->
+                        <td class="assignment-cell"
+                            th:attr="data-shift=${shiftEntry.key},
+                                 data-role=${roleEntry.key},
+                                 data-date=${#temporals.format(date, 'EEE (dd/MM)')},
+                                 data-date-value=${#temporals.format(date, 'yyyy-MM-dd')}"
+                            th:each="date : ${dates}">
+                            <th:block th:if="${roleEntry.value.containsKey(date)}">
+                                <th:block th:if="${!#lists.isEmpty(roleEntry.value.get(date))}">
+                                    <span th:text="${#strings.listJoin(roleEntry.value.get(date), ', ')}"></span>
+                                </th:block>
+                                <th:block th:if="${#lists.isEmpty(roleEntry.value.get(date))}">
+                                    <span class="text-muted">-</span>
+                                </th:block>
+                            </th:block>
+                            <th:block th:unless="${roleEntry.value.containsKey(date)}">
+                                <span class="text-muted">-</span>
+                            </th:block>
+                        </td>
+                    </tr>
+                </th:block>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Message khi không có data -->
+    <div class="alert alert-warning" th:if="${schedule == null or schedule.isEmpty()}">
+        <i class="bi bi-info-circle"></i> No schedule data available for the selected period.
+    </div>
+</div>
+<!-- Modal for Shift Assignment -->
+<div aria-hidden="true" aria-labelledby="assignModalLabel" class="modal fade" id="assignModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignModalLabel">Assign Shift</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignForm">
+                    <input id="assignDate" name="assignDate" type="hidden">
+                    <div class="mb-3">
+                        <label class="form-label" for="role">Role</label>
+                        <input class="form-control" id="role" readonly type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="shift">Shift</label>
+                        <input class="form-control" id="shift" readonly type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="employee">Assign to</label>
+                        <select class="form-select" id="employee">
+                            <option th:each="m : ${managers}"
+                                    th:text="${m.name}"
+                                    th:value="${m.managerId}"
+                                    th:attr="data-role=${m.role.roleName}"></option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                <button class="btn btn-primary" id="saveAssign" type="button">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function() {
+        const modal = new bootstrap.Modal(document.getElementById("assignModal"));
+        const employeeSelect = document.getElementById("employee");
+        const saveBtn = document.getElementById("saveAssign");
+
+        // 🔹 Lưu danh sách managers gốc (kèm role)
+        const allOptions = Array.from(employeeSelect.querySelectorAll("option")).map(opt => ({
+            value: opt.value,
+            text: opt.textContent,
+            role: opt.getAttribute("data-role")
+        }));
+
+        // 🔹 Khi click vào 1 ô
+        document.querySelectorAll(".assignment-cell").forEach(cell => {
+            cell.addEventListener("click", function() {
+                const role = cell.getAttribute("data-role");
+                const shift = cell.getAttribute("data-shift");
+                const date = cell.getAttribute("data-date");
+
+                // Hiển thị lên modal
+                document.getElementById("role").value = role;
+                document.getElementById("shift").value = shift;
+                document.getElementById("assignDate").value = date;
+
+                // 🔹 Lọc managers theo role
+                employeeSelect.innerHTML = '<option value="">Select employee</option>';
+                allOptions.forEach(opt => {
+                    if (!opt.role || opt.role === role) {
+                        const option = document.createElement("option");
+                        option.value = opt.value;
+                        option.textContent = opt.text;
+                        employeeSelect.appendChild(option);
+                    }
+                });
+
+                modal.show();
+            });
+        });
+
+        // 🔹 Lưu khi bấm Save
+        saveBtn.addEventListener("click", function() {
+            const role = document.getElementById("role").value;
+            const shift = document.getElementById("shift").value;
+            const employee = employeeSelect.value;
+            const assignDate = document.getElementById("assignDate").value;
+
+            if (!employee) {
+                alert("Please select an employee!");
+                return;
+            }
+
+            // Cập nhật tên nhân viên vào đúng ô
+            const targetCell = document.querySelector(
+                `.assignment-cell[data-role="${role}"][data-date="${assignDate}"][data-shift="${shift}"]`
+            );
+            if (targetCell) {
+                targetCell.textContent = employeeSelect.querySelector(`option[value="${employee}"]`).textContent;
+            }
+
+            modal.hide();
+        });
+    });
+    /*]]>*/
+</script>
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Nếu Thymeleaf truyền selectedWeekRange và selectedYear, nó sẽ được nhúng ở đây
+    const selectedWeekRange = /*[[${selectedWeekRange}]]*/ null;
+    const selectedYear = /*[[${selectedYear}]]*/ null;
+
+    function generateWeekOptions(year) {
+        const weekSelect = document.getElementById('weekSelect');
+        weekSelect.innerHTML = '';
+
+        // đảm bảo year là số
+        year = parseInt(year, 10);
+        if (isNaN(year)) {
+            const opt = document.createElement('option');
+            opt.textContent = 'No weeks available';
+            opt.value = '';
+            weekSelect.appendChild(opt);
+            return;
+        }
+
+        // bắt đầu từ 1 Jan của năm
+        let date = new Date(year, 0, 1);
+
+        // tìm thứ Hai đầu tiên (getDay(): 0 = Sun, 1 = Mon)
+        while (date.getDay() !== 1) {
+            date.setDate(date.getDate() + 1);
+            if (date.getFullYear() > year + 1) break;
+        }
+
+        let weekNumber = 1;
+        let currentWeekValue = getCurrentWeekRange();
+
+        while ((date.getFullYear() === year) ||
+        (date.getFullYear() === year + 1 && date.getMonth() === 0 && date.getDate() < 7)) {
+
+            const startDate = new Date(date);
+            const endDate = new Date(date);
+            endDate.setDate(endDate.getDate() + 6);
+
+            const startStr = formatDate(startDate);
+            const endStr = formatDate(endDate);
+            const value = startStr + ' To ' + endStr;
+
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+
+            // nếu có selectedWeekRange từ server, chọn nó
+            if (selectedWeekRange && selectedWeekRange === value) {
+                option.selected = true;
+            }
+
+            // nếu không có selectedWeekRange (lần đầu load) và đây là tuần hiện tại → chọn
+            else if (!selectedWeekRange && value === currentWeekValue && year === new Date().getFullYear()) {
+                option.selected = true;
+            }
+
+            weekSelect.appendChild(option);
+
+            // sang tuần tiếp theo
+            date.setDate(date.getDate() + 7);
+            weekNumber++;
+            if (weekNumber > 53) break;
+        }
+
+        // Nếu không có option nào (phòng trường hợp unexpected), thêm placeholder
+        if (weekSelect.options.length === 0) {
+            const opt = document.createElement('option');
+            opt.textContent = 'No weeks available';
+            opt.value = '';
+            weekSelect.appendChild(opt);
+        }
+    }
+
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return day + '/' + month;
+    }
+
+    // 🟢 Hàm trả về range tuần hiện tại (VD: "28/10 To 03/11")
+    function getCurrentWeekRange() {
+        const now = new Date();
+        let monday = new Date(now);
+        while (monday.getDay() !== 1) {
+            monday.setDate(monday.getDate() - 1);
+        }
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate() + 6);
+        return formatDate(monday) + ' To ' + formatDate(sunday);
+    }
+
+    function setCurrentWeek() {
+        const now = new Date();
+        const year = now.getFullYear();
+
+        document.getElementById('yearSelect').value = year;
+        generateWeekOptions(year);
+
+        const currentWeek = getCurrentWeekRange();
+        const weekSelect = document.getElementById('weekSelect');
+        for (let option of weekSelect.options) {
+            if (option.value === currentWeek) {
+                option.selected = true;
+                break;
+            }
+        }
+    }
+
+    // 🟢 Khởi tạo khi load trang
+    document.addEventListener('DOMContentLoaded', function () {
+        const yearSelect = document.getElementById('yearSelect');
+
+        // nếu không có selectedYear từ server thì dùng năm hiện tại
+        if (!selectedYear) {
+            yearSelect.value = new Date().getFullYear();
+        }
+
+        generateWeekOptions(yearSelect.value);
+
+        yearSelect.addEventListener('change', function () {
+            generateWeekOptions(this.value);
+        });
+    });
+    /*]]>*/
+</script>
+
+
+</body>
+</html>

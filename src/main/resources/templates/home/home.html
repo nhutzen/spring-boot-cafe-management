@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header class="container-fluid bg-dark text-white p-3" th:replace="layout/header :: menu"></header>
+<body>
+<div th:insert="~{layout/header::navbar-menu}"></div>
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+<!-- Main Content -->
+<div class="container my-5">
+    <div class="container py-3">
+        <div id="banner-slider" class="swiper-container shadow-sm" style="height: 350px;">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide d-flex align-items-center justify-content-center bg-light">
+                    <p class="text-muted">Loading Banner...</p>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </div>
+
+    <!-- Title -->
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold">Our Menu</h1>
+    </div>
+
+    <!-- Search Box -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+            <form th:action="@{/home/search}" method="get" class="d-flex mb-3">
+                <input type="text"
+                       name="keyword"
+                       class="form-control me-2 rounded-pill shadow-sm"
+                       style="padding: 0.75rem 1.25rem;"
+                       placeholder="Search for your favorite drink..."
+                       th:value="${keyword}" aria-label="Search">
+                <button class="btn btn-brand-primary rounded-pill" type="submit" style="padding: 0.75rem 1.5rem;">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Filter (Redesigned as Pills) -->
+    <form th:action="@{/home}" method="get" class="mb-5">
+        <input type="hidden" name="keyword" th:value="${keyword}"/>
+
+        <div class="category-filter-nav">
+            <!-- All Categories Pill -->
+            <input class="btn-check" type="radio" name="categoryId" id="category-all" value="0"
+                   th:checked="${selectedCategoryId == null || selectedCategoryId == 0}"
+                   onchange="this.form.submit()">
+            <label class="btn btn-outline-brand" for="category-all">
+                All Categories
+            </label>
+
+            <!-- Dynamic Categories Pills -->
+            <div th:each="category : ${categoryList}">
+                <input class="btn-check" type="radio" name="categoryId"
+                       th:id="'category-' + ${category.cateId}"
+                       th:value="${category.cateId}"
+                       th:checked="${category.cateId == selectedCategoryId}"
+                       onchange="this.form.submit()">
+                <label class="btn btn-outline-brand"
+                       th:for="'category-' + ${category.cateId}"
+                       th:text="${category.cateName}">
+                    Category Name
+                </label>
+            </div>
+        </div>
+    </form>
+
+
+    <!-- Product Grid or Empty State -->
+    <div class="content-area">
+        <!-- Empty State -->
+        <div th:if="${pageProduct.isEmpty()}" class="empty-state-card shadow-sm">
+            <i class="fa-regular fa-compass"></i>
+            <h4>No Products Found</h4>
+            <p th:if="${keyword != null and !keyword.isEmpty()}">
+                We couldn't find anything matching: <strong>"[[${keyword}]]"</strong>
+            </p>
+            <p th:unless="${keyword != null and !keyword.isEmpty()}">
+                There are no products available in this category.
+            </p>
+        </div>
+
+        <!-- Product Grid -->
+        <div th:unless="${pageProduct.isEmpty()}" class="product-grid">
+            <div th:each="product : ${pageProduct}"
+                 class="card product-card"
+                 th:onclick="|window.location.href='@{/product/{id}(id=${product.proId})}'|">
+
+                <img th:src="@{/uploads/{img}(img=${product.img})}"
+                     class="card-img-top"
+                     alt="Product Image"
+                     onerror="this.src='https://placehold.co/300x300/f4f7f6/6c757d?text=Image+Not+Found'">
+
+                <div class="card-body">
+                    <p class="card-title" th:text="${product.proName}">Product Name</p>
+                    <p class="card-text"
+                       th:text="${#strings.concat(#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT'), ' VND')}">
+                        30,000 VND
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Product Page Navigation" class="mt-5" th:if="${pageProduct.getTotalPages() > 1}">
+        <ul class="list-unstyled pagination justify-content-center">
+            <th:block th:with="
+                isSearch=${keyword != null and !keyword.isEmpty()},
+                currentURL=${isSearch ? '/home/search' : '/home'},
+                currentKeyword=${keyword != null ? keyword : ''},
+                currentCategoryId=${selectedCategoryId != null ? selectedCategoryId : 0}
+            ">
+
+                <!-- Previous Page -->
+                <li class="page-item" th:classappend="${pageProduct.isFirst()} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="@{${currentURL}(
+                           page=${pageProduct.getNumber()},
+                           keyword=${isSearch ? currentKeyword : null},
+                           categoryId=${isSearch ? null : currentCategoryId}
+                       )}">
+                        &laquo;
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(1,pageProduct.getTotalPages())}"
+                    th:classappend="${i == pageProduct.getNumber()+1} ? 'active':''">
+                    <a class="page-link"
+                       th:href="@{${currentURL}(
+                           page=${i},
+                           keyword=${isSearch ? currentKeyword : null},
+                           categoryId=${isSearch ? null : currentCategoryId}
+                       )}"
+                       th:text="${i}"></a>
+                </li>
+
+                <!-- Next Page -->
+                <li class="page-item" th:classappend="${pageProduct.isLast()} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{${currentURL}(
+                           page=${pageProduct.getNumber() + 2},
+                           keyword=${isSearch ? currentKeyword : null},
+                           categoryId=${isSearch ? null : currentCategoryId}
+                       )}">
+                        &raquo;
+                    </a>
+                </li>
+            </th:block>
+        </ul>
+    </nav>
+</div>
+<div th:insert="~{layout/footer}"></div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/banners')
+            .then(response => response.json())
+            .then(banners => {
+                const sliderWrapper = document.querySelector('#banner-slider .swiper-wrapper');
+                sliderWrapper.innerHTML = ''; // Xóa nội dung chờ
+
+                if (banners && banners.length > 0) {
+                    banners.forEach(banner => {
+                        const slide = document.createElement('div');
+                        slide.classList.add('swiper-slide');
+                        slide.innerHTML = `
+                            <a href="${banner.linkUrl || '#'}">
+                                <img src="${banner.imagePath}" alt="${banner.title || 'Banner'}" style="width: 100%; height: 100%; object-fit: cover;"/>
+                            </a>
+                        `;
+                        sliderWrapper.appendChild(slide);
+                    });
+
+                    // Khởi tạo Slider sau khi đã tải dữ liệu
+                    new Swiper('#banner-slider', {
+                        loop: true,
+                        autoplay: { delay: 4000, disableOnInteraction: false, },
+                        pagination: { el: '.swiper-pagination', clickable: true, },
+                        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev', },
+                    });
+                } else {
+                    sliderWrapper.innerHTML = '<div class="swiper-slide d-flex align-items-center justify-content-center"><p class="text-muted">Hiện chưa có banner nào.</p></div>';
+                }
+            })
+            .catch(error => console.error('Lỗi khi tải banner:', error));
+    });
+</script>
+</body>
+</html>

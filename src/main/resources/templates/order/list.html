@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Create Order',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/order/list.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<!-- Main content -->
+<div class="main-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="m-0">Order List</h2>
+        <a href="/order/history-list" class="btn btn-outline-secondary">
+            History
+        </a>
+    </div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Staff</th>
+            <th>Table</th>
+            <th>Status</th>
+            <th>Points Used</th>
+            <th>Voucher</th>
+            <th>Total Price</th>
+            <th>Created At</th>
+            <th>Completed At</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <!-- Nếu có đơn -->
+        <tr th:each="order : ${orders}"
+            th:data-cust-id="${order.customer != null ? order.customer.cusId : 'N/A'}"
+            th:data-cust-name="${order.customer != null ? order.customer.name : 'N/A'}"
+            th:data-cust-phone="${order.customer != null ? order.customer.phoneNumber : 'N/A'}"
+            th:data-cust-email="${order.customer != null ? order.customer.email : 'N/A'}"
+            th:data-cust-address="${order.customer != null ? order.customer.address : 'N/A'}"
+            th:data-cust-photo="${order.customer != null ? '/uploads/' + order.customer.img : '/uploads/default-user.jpg'}">
+
+            <td th:text="${order.orderId}"></td>
+            <td th:text="${order.customer != null ? order.customer.name : 'Guest'}"></td>
+            <td th:text="${order.staff != null ? order.staff.name : 'N/A'}"></td>
+            <td th:text="${order.table != null ? order.table.tableId : 'Take-away'}"></td>
+            <td th:text="${order.status}"
+                th:classappend="${order.status == 'Pending'} ? 'status-pending' : ''"></td>
+            <td th:text="${order.pointsUsed}"></td>
+            <td th:text="${order.voucher != null ? order.voucher.voucherName : 'None'}"></td>
+            <td th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')} + ' VND'"></td>
+            <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+            <td>-</td>
+        </tr>
+
+        <!-- Nếu không có đơn -->
+        <tr th:if="${orders == null or orders.isEmpty()}" class="no-orders-row">
+            <td colspan="10" class="text-center text-muted py-4">
+                There are not any orders.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav aria-label="Order pagination" th:if="${orders != null and !orders.isEmpty() and totalPages > 0}">
+        <ul class="pagination justify-content-center">
+            <!-- Previous -->
+            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/order/list(page=${currentPage - 1})}" aria-label="Previous">
+                    <span aria-hidden="true">Prev</span>
+                </a>
+            </li>
+
+            <!-- Page numbers -->
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{/order/list(page=${i})}" th:text="${i}"></a>
+            </li>
+
+            <!-- Next -->
+            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a class="page-link" th:href="@{/order/list(page=${currentPage + 1})}" aria-label="Next">
+                    <span aria-hidden="true">Next</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+<!-- Modal hiển thị chi tiết -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #FF7A00;">
+                <h5 class="modal-title">Order Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Order Information</h6>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Staff</th>
+                        <th>Table</th>
+                        <th>Status</th>
+                        <th>Product(s)</th>
+                        <th>Points Used</th>
+                        <th>Voucher</th>
+                        <th>Total Price</th>
+                        <th>Created At</th>
+                        <th>Completed At</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr id="order-detail-row"></tr>
+                    </tbody>
+
+                </table>
+
+                <h6 class="customer-info">Customer Information</h6>
+                <div class="customer-section">
+                    <div class="customer-table">
+                        <table class="table table-bordered">
+                            <tr><th>ID</th><td id="cust-id"></td></tr>
+                            <tr><th>Name</th><td id="cust-name"></td></tr>
+                            <tr><th>Phone</th><td id="cust-phone"></td></tr>
+                            <tr><th>Email</th><td id="cust-email"></td></tr>
+                            <tr><th>Address</th><td id="cust-address"></td></tr>
+                        </table>
+                    </div>
+                    <div class="customer-photo">
+                        <img id="cust-photo" alt="Customer Photo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll(".main-content table.table.table-striped tbody tr").forEach(row => {
+        if (row.classList.contains("no-orders-row")) return;
+        if (row.querySelectorAll("td").length === 0) return;
+
+        row.addEventListener("click", () => {
+            const orderId = row.querySelector("td")?.textContent?.trim();
+
+            fetch(`/order/detail/${orderId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert(data.message || "Order not found");
+                        return;
+                    }
+
+                    const o = data.order;
+                    const c = data.customer;
+
+                    const completedAt = o.update ? formatDateTime(o.update) : "-";
+
+
+                    // tạo danh sách sản phẩm (mỗi sản phẩm 1 dòng xuống)
+                    const productNames = o.products.length > 0
+                        ? o.products.map(p =>
+                            `<div>${p.name} — ${Number(p.price).toLocaleString()} VND × ${p.quantity}</div>`
+                        ).join("")
+                        : `<div class='text-muted'>No products</div>`;
+
+
+                    // hiển thị order info
+                    document.getElementById("order-detail-row").innerHTML = `
+                    <td>${o.id}</td>
+                    <td>${o.customer}</td>
+                    <td>${o.staff}</td>
+                    <td>${o.table}</td>
+                    <td>${o.status}</td>
+                    <td>${productNames}</td>
+                    <td>${o.pointsUsed}</td>
+                    <td>${o.voucher}</td>
+                    <td>${o.totalPrice.toLocaleString()} VND</td>
+                    <td>${formatDateTime(o.date)}</td>
+                    <td>-</td>
+                `;
+
+                    if (c.id === "N/A") {
+                        // --- TRƯỜNG HỢP 1: KHÁCH VÃNG LAI (Guest) ---
+                        // (Vì backend trả về id="N/A" cho Guest)
+                        document.getElementById("cust-id").textContent = "N/A";
+                        document.getElementById("cust-name").textContent = "N/A";
+                        document.getElementById("cust-phone").textContent = "N/A";
+                        document.getElementById("cust-email").textContent = "N/A";
+                        document.getElementById("cust-address").textContent = "N/A";
+                        document.getElementById("cust-photo").src = "/uploads/avatar.jpeg";
+                    } else {
+                        // --- TRƯỜNG HỢP 2: KHÁCH HÀNG ĐÃ ĐĂNG KÝ ---
+                        document.getElementById("cust-id").textContent = c.id;
+                        document.getElementById("cust-name").textContent = c.name;
+
+                        // Dùng (?? "") để biến giá trị null (từ JSON) thành chuỗi rỗng ""
+                        document.getElementById("cust-phone").textContent = c.phone ?? "";
+                        document.getElementById("cust-email").textContent = c.email ?? "";
+                        document.getElementById("cust-address").textContent = c.address ?? "";
+                        document.getElementById("cust-photo").src = c.img ? `/uploads/${c.img}` : "/uploads/avatar.jpeg";
+                    }
+
+                    new bootstrap.Modal(document.getElementById("orderDetailModal")).show();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error loading order detail");
+                });
+        });
+    });
+    function formatDateTime(dateTime) {
+        if (!dateTime || dateTime === "-" || dateTime === null) {
+            return "-";
+        }
+
+        const date = new Date(dateTime);
+        if (isNaN(date.getTime())) {
+            return "-";
+        }
+
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${hours}:${minutes} ${day}/${month}/${year}`;
+    }
+</script>
+
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<div th:insert="~{layout/footer}"></div>
+</body>
+</html>

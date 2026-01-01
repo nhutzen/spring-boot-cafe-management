@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Edit Order',
+            pageSpecificCss=~{:: .page-css}
+          )}">
+    <th:block class="page-css">
+        <link rel="stylesheet" href="/assets/css/order/edit.css">
+    </th:block>
+</head>
+
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="m-0">Edit Order</h2>
+        <a href="/order/edit-history" class="btn btn-outline-secondary">
+            History
+        </a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Created By (Cashier)</th>
+            <th>Table</th>
+            <th>Product(s)</th>
+            <th>Note</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <form th:action="@{/order/updateStatus}" method="post" th:each="order, iterStat : ${orders}">
+            <tr>
+                <td th:text="${iterStat.count}"></td>
+
+                <td th:text="${order.staff != null ? order.staff.name : '-'}"></td>
+
+                <td th:text="${order.table != null ? order.table.tableId : 'Take-away'}"></td>
+
+                <td>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li th:each="item : ${order.orderItems}"
+                            th:text="${item.product != null ? item.product.proName + ' × ' + item.quantity : '-'}"></li>
+                    </ul>
+                </td>
+
+                <td>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li th:each="item : ${order.orderItems}"
+                            th:text="${item.note != null && item.note != '' ? item.note : '-'}"></li>
+                    </ul>
+                </td>
+
+                <td>
+                    <input type="hidden" name="orderId" th:value="${order.orderId}" />
+
+                    <th:block th:if="${order.status == 'Pending'}">
+                        <select name="status" class="form-select form-select-sm me-2" sec:authorize="hasRole('BARISTA')">
+                            <option value="" selected disabled>Pending</option>
+                            <option value="Ready">Ready</option>
+                            <option value="Canceled">Canceled</option>
+                        </select>
+                        <span sec:authorize="!hasRole('BARISTA')" th:text="${order.status}">Pending</span>
+                    </th:block>
+
+                    <th:block th:if="${order.status == 'Ready'}">
+                        <select name="status" class="form-select form-select-sm me-2" sec:authorize="hasAnyRole('WAITER', 'ROLE_WAITER')">
+                            <option value="Ready" selected disabled>Ready</option>
+                            <option value="Served">Served</option>
+                        </select>
+                        <span sec:authorize="!hasAnyRole('WAITER', 'ROLE_WAITER')" th:text="${order.status}">Ready</span>
+                    </th:block>
+
+                </td>
+
+                <td>
+                    <button type="submit" class="btn btn-sm btn-primary mt-1"
+                            th:if="(${order.status == 'Pending'} and ${#authorization.expression('hasRole(''BARISTA'')')}) or
+                               (${order.status == 'Ready'} and ${#authorization.expression('hasAnyRole(''WAITER'', ''ROLE_WAITER'')')})">
+                        Save
+                    </button>
+                </td>
+            </tr>
+        </form> <tbody th:if="${orders == null or orders.isEmpty()}">
+    <tr>
+        <td colspan="7" class="text-center text-muted py-3">
+            There are not any orders.
+        </td>
+    </tr>
+    </tbody>
+    </table>
+
+    <nav aria-label="Order pagination" th:if="${orders != null and !orders.isEmpty() and totalPages > 0}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/order/edit(page=${currentPage - 1})}" aria-label="Previous">
+                    <span aria-hidden="true">Prev</span>
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{/order/edit(page=${i})}" th:text="${i}"></a>
+            </li>
+
+            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a class="page-link" th:href="@{/order/edit(page=${currentPage + 1})}" aria-label="Next">
+                    <span aria-hidden="true">Next</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const today = new Date();
+
+        // Lấy phần ngày hôm nay (YYYY-MM-DD)
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+
+        // Tính thời gian hiện tại để set mặc định
+        const hh = String(today.getHours()).padStart(2, "0");
+        const min = String(today.getMinutes()).padStart(2, "0");
+        const nowStr = `${todayStr}T${hh}:${min}`;
+
+        // Gán giới hạn cho tất cả input datetime-local
+        document.querySelectorAll(".updatedAtInput").forEach(input => {
+            input.min = `${todayStr}T00:00`;
+            input.max = `${todayStr}T23:59`;
+            input.value = nowStr; // set mặc định = giờ hiện tại
+        });
+    });
+</script>
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<div th:insert="~{layout/footer}"></div>
+</body>
+</html>

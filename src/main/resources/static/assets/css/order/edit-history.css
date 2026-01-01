@@ -1,0 +1,168 @@
+:root {
+    --brand-primary: #FF7A00;
+    --brand-white: #FFFFFF;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+    --brand-primary-light: #fffaf5; /* Light orange for hover */
+}
+
+/* --- Navbar --- */
+.navbar {
+    background-color: var(--brand-white) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary) !important;
+}
+
+.navbar .nav-link {
+    color: var(--brand-dark) !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-primary) !important;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    height: 100vh;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    background-color: white;
+    overflow: hidden;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    font-size: 17px;
+}
+
+th {
+    background-color: #e6e6e6;
+    padding: 10px;
+    text-align: center;
+}
+
+td {
+    text-align: center;
+    padding: 10px;
+    vertical-align: middle;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+table th:nth-child(1),  /* # */
+table td:nth-child(1) {
+    width: 1%;
+}
+
+table th:nth-child(2),  /* Created By */
+table td:nth-child(2) {
+    width: 15%;
+}
+
+table th:nth-child(3),  /* Table */
+table td:nth-child(3) {
+    width: 9%;
+    text-align: left;
+}
+
+table th:nth-child(4),  /* Product(s) */
+table td:nth-child(4) {
+    width: 16%;
+    text-align: left;
+}
+
+table th:nth-child(5),  /* Note */
+table td:nth-child(5) {
+    width: 10%;
+}
+
+table th:nth-child(6),  /* Status */
+table td:nth-child(6) {
+    width: 5%;
+}
+
+table th:nth-child(7),  /* Updated At*/
+table td:nth-child(7) {
+    width: 13%;
+}
+
+table th:nth-child(8),  /* Made By (Barista) */
+table td:nth-child(8) {
+    width: 14%;
+}
+
+table th:nth-child(9),  /* UServed By (Waiter) */
+table td:nth-child(9) {
+    width: 20%;
+}
+
+td ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 10px;
+}
+
+td ul li {
+    margin-bottom: 3px;
+    font-size: 18px;
+}
+
+select.form-select {
+    font-size: 17px;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    z-index: 1;
+}
+
+.pagination .page-link {
+    color: var(--brand-primary);
+}
+
+.pagination .page-link:hover {
+    color: #E66E00;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--brand-gray);
+}
+
+.btn-orange {
+    background-color: #FF7A00 !important;
+    border-color: #FF7A00 !important;
+    color: #ffffff !important;
+}
+
+.btn-orange:hover {
+    background-color: #e66a00 !important;
+    border-color: #e66a00 !important;
+    color: #ffffff !important;
+}

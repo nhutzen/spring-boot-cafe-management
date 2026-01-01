@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Order History List',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/order/list.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<div class="main-content">
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <h2 class="m-0">Order History</h2>
+
+        <form th:action="@{/order/history-list}" method="get" class="d-flex gap-3 align-items-end"
+              sec:authorize="hasRole('ADMIN')">
+            <div>
+                <label for="startDate" class="form-label mb-0" style="font-weight: 500;">From Date:</label>
+                <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label for="endDate" class="form-label mb-0" style="font-weight: 500;">To Date:</label>
+                <input type="date" id="endDate" name="endDate" th:value="${endDate}" class="form-control form-control-sm">
+            </div>
+            <button type="submit" class="btn btn-orange btn-sm" style="height: 31px;">Filter</button>
+            <a th:href="@{/order/history-list}" class="btn btn-secondary btn-sm" style="height: 31px;">Clear</a>
+        </form>
+    </div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Staff</th>
+            <th>Table</th>
+            <th>Status</th>
+            <th>Points Used</th>
+            <th>Voucher</th>
+            <th>Total Price</th>
+            <th>Created At</th>
+            <th>Completed At</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="order : ${orders}"
+            th:data-cust-id="${order.customer != null ? order.customer.cusId : 'N/A'}"
+            th:data-cust-name="${order.customer != null ? order.customer.name : 'N/A'}"
+            th:data-cust-phone="${order.customer != null ? order.customer.phoneNumber : 'N/A'}"
+            th:data-cust-email="${order.customer != null ? order.customer.email : 'N/A'}"
+            th:data-cust-address="${order.customer != null ? order.customer.address : 'N/A'}"
+            th:data-cust-photo="${order.customer != null ? '/uploads/' + order.customer.img : '/uploads/default-user.jpg'}">
+
+            <td th:text="${order.orderId}"></td>
+            <td th:text="${order.customer != null ? order.customer.name : 'Guest'}"></td>
+            <td th:text="${order.staff != null ? order.staff.name : 'N/A'}"></td>
+            <td th:text="${order.table != null ? order.table.tableId : 'Take-away'}"></td>
+            <td th:text="${order.status}"
+                th:classappend="${order.status == 'Served'} ? 'status-served' :
+                (${order.status == 'Canceled'} ? 'status-canceled' : '')"></td>
+            <td th:text="${order.pointsUsed}"></td>
+            <td th:text="${order.voucher != null ? order.voucher.voucherName : 'None'}"></td>
+            <td th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')} + ' VND'"></td>
+            <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+            <td th:text="${#temporals.format(order.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+        </tr>
+
+        <tr th:if="${orders == null or orders.isEmpty()}" class="no-orders-row">
+            <td colspan="10" class="text-center text-muted py-4">
+                There are not any history orders.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <nav aria-label="Order pagination" th:if="${orders != null and !orders.isEmpty() and totalPages > 0}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/order/history-list(page=${currentPage - 1}, startDate=${startDate}, endDate=${endDate})}" aria-label="Previous">
+                    <span aria-hidden="true">Prev</span>
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{/order/history-list(page=${i}, startDate=${startDate}, endDate=${endDate})}" th:text="${i}"></a>
+            </li>
+
+            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a class="page-link" th:href="@{/order/history-list(page=${currentPage + 1}, startDate=${startDate}, endDate=${endDate})}" aria-label="Next">
+                    <span aria-hidden="true">Next</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #FF7A00;">
+                <h5 class="modal-title">Order Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Order Information</h6>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Staff</th>
+                        <th>Table</th>
+                        <th>Status</th>
+                        <th>Product(s)</th>
+                        <th>Points Used</th>
+                        <th>Voucher</th>
+                        <th>Total Price</th>
+                        <th>Created At</th>
+                        <th>Completed At</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr id="order-detail-row"></tr>
+                    </tbody>
+                </table>
+
+                <h6 class="customer-info">Customer Information</h6>
+                <div class="customer-section">
+                    <div class="customer-table">
+                        <table class="table table-bordered">
+                            <tr><th>ID</th><td id="cust-id"></td></tr>
+                            <tr><th>Name</th><td id="cust-name"></td></tr>
+                            <tr><th>Phone</th><td id="cust-phone"></td></tr>
+                            <tr><th>Email</th><td id="cust-email"></td></tr>
+                            <tr><th>Address</th><td id="cust-address"></td></tr>
+                        </table>
+                    </div>
+                    <div class="customer-photo">
+                        <img id="cust-photo" alt="Customer Photo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll(".main-content table.table.table-striped tbody tr").forEach(row => {
+        if (row.classList.contains("no-orders-row")) return;
+        if (row.querySelectorAll("td").length === 0) return;
+
+        row.addEventListener("click", () => {
+            const orderId = row.querySelector("td")?.textContent?.trim();
+
+            fetch(`/order/detail/${orderId}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log("📦 Customer data:", data.customer);
+                    if (!data.success) {
+                        alert(data.message || "Order not found");
+                        return;
+                    }
+
+                    const o = data.order;
+                    const c = data.customer;
+
+                    const productNames = o.products.length > 0
+                        ? o.products.map(p =>
+                            `<div>${p.name} — ${Number(p.price).toLocaleString()} VND × ${p.quantity}</div>`
+                        ).join("")
+                        : `<div class='text-muted'>No products</div>`;
+
+                    document.getElementById("order-detail-row").innerHTML = `
+                         <td>${o.id}</td>
+                          <td>${o.customer}</td>
+                           <td>${o.staff}</td>
+                           <td>${o.table}</td>
+                           <td>${o.status}</td>
+                           <td>${productNames}</td>
+                           <td>${o.pointsUsed}</td>
+                           <td>${o.voucher || 'None'}</td>
+                           <td>${o.totalPrice.toLocaleString()} VND</td>
+                           <td>${formatDateTime(o.date)}</td>
+                           <td>${formatDateTime(o.update)}</td>
+                     `;
+
+                    if (c.id === "N/A") {
+                        // --- TRƯỜNG HỢP 1: KHÁCH VÃNG LAI (Guest) ---
+                        // (Vì backend trả về id="N/A" cho Guest)
+                        document.getElementById("cust-id").textContent = "N/A";
+                        document.getElementById("cust-name").textContent = "N/A";
+                        document.getElementById("cust-phone").textContent = "N/A";
+                        document.getElementById("cust-email").textContent = "N/A";
+                        document.getElementById("cust-address").textContent = "N/A";
+                        document.getElementById("cust-photo").src = "/uploads/avatar.jpeg";
+                    } else {
+                        // --- TRƯỜNG HỢP 2: KHÁCH HÀNG ĐÃ ĐĂNG KÝ ---
+                        document.getElementById("cust-id").textContent = c.id;
+                        document.getElementById("cust-name").textContent = c.name;
+
+                        // Dùng (?? "") để biến giá trị null (từ JSON) thành chuỗi rỗng ""
+                        document.getElementById("cust-phone").textContent = c.phone ?? "";
+                        document.getElementById("cust-email").textContent = c.email ?? "";
+                        document.getElementById("cust-address").textContent = c.address ?? "";
+                        document.getElementById("cust-photo").src = c.img ? `/uploads/${c.img}` : "/uploads/avatar.jpeg";
+                    }
+
+                    new bootstrap.Modal(document.getElementById("orderDetailModal")).show();
+                })
+
+                .catch(err => {
+                    console.error(err);
+                    alert("Error loading order detail");
+                });
+        });
+    });
+    function formatDateTime(dateString) {
+        if (!dateString) return 'N/A'; // Xử lý nếu ngày là null
+        const date = new Date(dateString);
+        if (isNaN(date)) return 'Invalid Date'; // Xử lý nếu ngày không hợp lệ
+
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${hours}:${minutes} ${day}/${month}/${year}`;
+    }
+
+</script>
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<div th:insert="~{layout/footer}"></div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<head th:fragment="common-head(pageTitle, pageSpecificCss)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${pageTitle} + ' | WIMI RUSTIC'">WIMI RUSTIC</title>
+
+    <th:block th:if="${_csrf != null}">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    </th:block>
+
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fpt.com/-/media/project/fpt-corporation/fpt/settings/favicon.png" rel="shortcut icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <th:block th:replace="${pageSpecificCss} ?: ~{}"></th:block>
+</head>
+
+
+<div th:fragment="navbar-main">
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand-logo fs-4" th:href="@{/dashboard}" sec:authorize="hasRole('ADMIN')">
+                <i class="fa-solid fa-mug-saucer me-2"></i>WIMI RUSTIC
+            </a>
+            <a class="navbar-brand-logo fs-4" th:href="@{/home}" sec:authorize="isAnonymous()">
+                <i class="fa-solid fa-mug-saucer me-2"></i>WIMI RUSTIC
+            </a>
+            <a class="navbar-brand-logo fs-4" th:href="@{/home}"
+               sec:authorize="hasAnyRole('ROLE_CASHIER', 'ROLE_WAITER', 'ROLE_CUSTOMER', 'ROLE_BARISTA')">
+                <i class="fa-solid fa-mug-saucer me-2"></i>WIMI RUSTIC
+            </a>
+            <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                    class="navbar-toggler"
+                    data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link active" th:href="@{/dashboard}">Dashboard</a>
+                    </li>
+
+                    <!--                    <li class="nav-item" sec:authorize="hasAnyRole('ROLE_WAITER', 'ROLE_CUSTOMER')">-->
+                    <!--                        <a class="nav-link" th:href="@{/home}">Home</a>-->
+                    <!--                    </li>-->
+                    <li class="nav-item"
+                        sec:authorize="hasAnyRole('ROLE_CASHIER', 'ROLE_WAITER', 'ROLE_CUSTOMER','ROLE_ADMIN','ROLE_BARISTA')">
+                        <a class="nav-link" th:href="@{/home}">Home</a>
+                    </li>
+
+                    <li class="nav-item dropdown" sec:authorize="hasAnyRole('ROLE_CASHIER')">
+                        <a aria-expanded="false" class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                           data-bs-toggle="dropdown"
+                           href="#" id="tableDropdown" role="button">
+                            <span>Operations</span>
+                        </a>
+                        <ul aria-labelledby="tableDropdown" class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/table/booking/management}">Booking History</a></li>
+                            <li><a class="dropdown-item" th:href="@{/table/management}">Table Management</a></li>
+                            <li><a class="dropdown-item" th:href="@{/order/create}">Create Order</a></li>
+                            <li><a class="dropdown-item" th:href="@{/order/list}">Order List</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown" sec:authorize="hasAnyRole('ROLE_BARISTA')">
+                        <a aria-expanded="false" class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                           data-bs-toggle="dropdown"
+                           href="#" id="tableDropdown" role="button">
+                            <span>Operations</span>
+                        </a>
+                        <ul aria-labelledby="tableDropdown" class="dropdown-menu">
+                            <li>
+                                <a class="nav-link active" th:href="@{/order/edit}">Edit Order</a>
+                            </li>
+                            <li>
+                                <a class="nav-link active" th:href="@{/product/list}">Edit Product</a>
+                            </li>
+
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown" sec:authorize="hasAnyRole('ROLE_WAITER')">
+                        <a class="nav-link" th:href="@{/table/management}">Table Management</a>
+                    </li>
+                    <li class="nav-item dropdown" sec:authorize="hasAnyRole('ROLE_WAITER')">
+                        <a class="nav-link active" th:href="@{/order/edit}">Edit Order</a>
+                    </li>
+
+
+                    <li class="nav-item dropdown"
+                        sec:authorize="hasAnyRole('ROLE_CUSTOMER')">
+                        <a aria-expanded="false" class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                           data-bs-toggle="dropdown"
+                           href="#" id="tableDropdown" role="button">
+                            <span>Table</span>
+                        </a>
+                        <ul aria-labelledby="tableDropdown" class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/table/list}">List Tables</a></li>
+                            <li sec:authorize="hasRole('ROLE_CUSTOMER')"><a class="dropdown-item"
+                                                                            th:href="@{/table/booking/my}">My
+                                Bookings</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-user-circle me-1"></i>
+                            <span sec:authentication="principal.fullName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li sec:authorize="hasRole('CUSTOMER')">
+                                <form th:action="@{/customer/logout}" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item">Log out</button>
+                                </form>
+                            </li>
+                            <li sec:authorize="!hasRole('CUSTOMER')">
+                                <form th:action="@{/staff/logout}" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item">Log out</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                    <ul class="navbar-nav ms-auto" sec:authorize="isAnonymous()">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/home}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/login}">Login</a>
+                        </li>
+                    </ul>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+
+<div th:fragment="navbar-guest">
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand-logo fs-4" href="#">
+                <i class="fa-solid fa-mug-saucer me-2"></i>WIMI RUSTIC
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/home}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/login}">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+
+<div th:fragment="footer">
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+</div>

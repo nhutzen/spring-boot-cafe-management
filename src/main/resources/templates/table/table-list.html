@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<header class="container-fluid bg-dark text-white p-3" th:replace="layout/header :: tablelist"></header>
+<body>
+<div th:insert="~{layout/header::navbar-tablelist}"></div>
+<!-- Main Content -->
+<main class="container my-5">
+    <h1 class="text-center mb-5">Table List</h1>
+
+    <!-- Table Grid -->
+    <div class="row g-4" th:if="${!tables.isEmpty()}">
+        <div class="col-md-6 col-lg-4 col-xl-3" th:each="table : ${tables}">
+            <!-- Unified Table Card -->
+            <div class="card table-card text-center h-100"
+                 th:classappend="${table.status == 'available' ? 'status-available' : (table.status == 'booked' ? 'status-booked' : 'status-occupied')}">
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="card-icon"
+                         th:classappend="${table.status == 'available' ? 'text-success' : (table.status == 'booked' ? 'text-warning' : 'text-danger')}">
+                        <i class="fa-solid fa-chair"></i>
+                    </div>
+
+                    <!-- Fixed placeholder to English -->
+                    <h5 class="card-title mb-2" th:text="'Table ' + ${table.tableId}">Table 01</h5>
+
+                    <!-- Status Badges (Kept as is, they look good) -->
+                    <th:block th:switch="${table.status}">
+                            <span class="badge rounded-pill bg-success-subtle border border-success-subtle text-success-emphasis mb-3"
+                                  th:case="'available'">Available</span>
+                        <span class="badge rounded-pill bg-warning-subtle border border-warning-subtle text-warning-emphasis mb-3"
+                              th:case="'booked'">Booked</span>
+                        <span class="badge rounded-pill bg-danger-subtle border border-danger-subtle text-danger-emphasis mb-3"
+                              th:case="'occupied'">Occupied</span>
+                    </th:block>
+
+                    <p class="card-text text-muted mb-3">
+                        <i class="fas fa-users me-1"></i>
+                        <span>Capacity: [[${table.capacity}]]</span>
+                    </p>
+
+                    <!-- "Book Now" Button -->
+                    <!-- Using mt-auto to push button to the bottom -->
+                    <div class="mt-auto" th:if="${table.status == 'available'}">
+                        <a th:href="@{/table/booking/new(table-id=${table.tableId})}"
+                           class="btn btn-brand-primary w-100">Book Now</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="text-center empty-state" th:if="${tables.isEmpty()}">
+        <i class="fa-regular fa-folder-open"></i>
+        <h3>No Table Info</h3>
+        <p>There are currently no tables to display.</p>
+    </div>
+</main>
+<div th:insert="~{layout/footer}"></div>
+<!-- Success Modal - Fixed close button color -->
+<div aria-hidden="true" aria-labelledby="successModalLabel" class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 0.75rem;">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button aria-label="Close" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        type="button"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-success mb-0" role="alert">
+                    <span th:text="${successMessage}">OK</span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <!-- Changed to btn-success -->
+                <button class="btn btn-success" data-bs-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const hasSuccess = /*[[${successMessage != null}]]*/ false;
+        if (hasSuccess) {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+        }
+    });
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,200 @@
+:root {
+    --brand-primary: #FF7A00;
+    --brand-white: #FFFFFF;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+    --brand-primary-light: #fffaf5; /* Light orange for hover */
+}
+
+/* --- Navbar --- */
+.navbar {
+    background-color: var(--brand-white) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary) !important;
+}
+
+.navbar .nav-link {
+    color: var(--brand-dark) !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-primary) !important;
+}
+
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    height: 100vh;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+table.table {
+    background-color: white;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+table.table td, table.table th {
+    border-color: black;
+    padding: 25px 30px;
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+table.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #fafafa;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table-striped tbody tr:hover {
+    background-color: #d9d9d9;
+}
+
+.table-striped tbody tr.no-orders-row:hover {
+    background-color: #fafafa;
+    cursor: default;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    z-index: 1;
+}
+
+.pagination .page-link {
+    color: var(--brand-primary);
+}
+
+.pagination .page-link:hover {
+    color: #E66E00;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--brand-gray);
+}
+
+.status-pending {
+    color: orange !important;
+    font-weight: bold;
+}
+
+/* Modal chỉnh sửa */
+.modal-dialog {
+    max-width: 180vw;
+    margin: auto;
+}
+
+.modal-content {
+    max-height: 100%;
+    overflow-y: hidden;
+    transform: scale(0.8);
+}
+
+.customer-info {
+    padding-left: 5%;
+}
+
+.customer-section {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+.customer-table {
+    flex: 1;
+    padding-left: 5%;
+
+}
+
+.customer-table table {
+    width: 700px;
+    font-size: 14px;
+}
+
+.customer-photo {
+    width: 160px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+    padding-right: 15%;
+}
+
+.customer-photo img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+}
+
+.customer-photo span {
+    margin-top: 10px;
+    font-weight: 500;
+    color: #555;
+}
+
+.status-served {
+    color: green !important;
+    font-weight: bold;
+}
+
+.status-canceled {
+    color: red !important;
+    font-weight: bold;
+}
+
+
+.btn-orange {
+    background-color: #FF7A00 !important;
+    border-color: #FF7A00 !important;
+    color: #ffffff !important;
+}
+
+.btn-orange:hover {
+    background-color: #e66a00 !important;
+    border-color: #e66a00 !important;
+    color: #ffffff !important;
+}

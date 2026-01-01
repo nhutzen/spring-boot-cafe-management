@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Application Error'}"></title>
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+    <style>
+        .error-container {
+            padding: 60px 15px;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            color: #dc3545; /* Bootstrap red */
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="error-container">
+
+                <div class="error-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i> &#9888;
+                </div>
+
+                <h1 class="display-4 text-danger" th:text="${title ?: 'Sorry, an error occurred!'}">Application
+                    Error</h1>
+
+                <p class="lead"
+                   th:text="${errorMessage ?: 'An unexpected problem occurred. Please try again or contact the administrator.'}">
+                    Inconsistent information or product does not exist.
+                </p>
+
+                <hr class="my-4">
+
+                <p>
+                    <a th:href="@{/home}" class="btn btn-secondary btn-lg mt-2">
+                        <i class="bi bi-house-door-fill"></i> Back to Home
+                    </a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+</body>
+</html>

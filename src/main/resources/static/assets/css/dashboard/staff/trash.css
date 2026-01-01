@@ -1,0 +1,117 @@
+:root {
+    --brand-primary: #FF7A00;
+    --brand-white: #FFFFFF;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+    --brand-primary-light: #fffaf5; /* Light orange for hover */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--brand-light-gray);
+    color: var(--brand-dark);
+}
+
+/* --- Navbar --- */
+.navbar {
+    background-color: var(--brand-white) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary) !important;
+}
+
+.navbar .nav-link {
+    color: var(--brand-dark) !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-primary) !important;
+}
+
+/* --- Card Style --- */
+.card {
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--brand-white);
+}
+
+/* --- Button Styles --- */
+.btn {
+    border-radius: 0.5rem; /* 8px */
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+}
+
+.btn-brand-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-brand-primary:hover {
+    background-color: #E66E00;
+    border-color: #E66E00;
+    color: var(--brand-white);
+}
+
+.btn-outline-secondary {
+    border-color: #ced4da;
+    color: var(--brand-dark);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--brand-light-gray);
+    border-color: #ced4da;
+    color: var(--brand-dark);
+}
+
+/* --- Form Input Style --- */
+.form-control, .form-select {
+    border-radius: 0.5rem; /* 8px */
+    padding: 0.6rem 1rem;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    height: auto;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+}
+
+/* --- Table Photo --- */
+.staff-photo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 0.5rem; /* 8px */
+    background-color: var(--brand-light-gray);
+}
+
+/* --- Pagination --- */
+.pagination .page-item.active .page-link {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    z-index: 1; /* Fixes hover issue */
+}
+
+.pagination .page-link {
+    color: var(--brand-primary);
+}
+
+.pagination .page-link:hover {
+    color: #E66E00;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--brand-gray);
+}

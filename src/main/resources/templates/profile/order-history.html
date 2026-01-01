@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Profile',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/dashboard.css">
+    <link rel="stylesheet" href="/assets/css/profile/order-history.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-12 col-xl-10">
+
+            <h1 class="text-center mb-4">Order History</h1>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Product(s)</th>
+                                <th>Note</th>
+                                <th>Status</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="order, iterStat : ${orderHistoryList}">
+                                <td th:text="${iterStat.count}"></td>
+                                <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+
+                                <td class="product-list">
+                                    <ul>
+                                        <li th:each="item : ${order.orderItems}"
+                                            th:text="${item.product != null ? item.product.proName + ' × ' + item.quantity : '-'}">
+                                        </li>
+                                    </ul>
+                                </td>
+
+                                <td class="note-list">
+                                    <ul>
+                                        <li th:each="item : ${order.orderItems}"
+                                            th:text="${item.note != null && item.note != '' ? item.note : '-'}">
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td th:text="${order.status}"
+                                    th:classappend="${order.status == 'Served'} ? 'status-served' :
+                                                    (${order.status == 'Canceled'} ? 'status-canceled' :
+                                                    (${order.status == 'Pending'} ? 'status-pending' :
+                                                    (${order.status == 'Ready'} ? 'status-ready' : '')))">
+                                    Status
+                                </td>
+                                <td class="text-end fw-bold"
+                                    th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')} + ' VND'">
+                                    50,000 VND
+                                </td>
+                            </tr>
+
+                            <tr th:if="${orderHistoryList == null or orderHistoryList.isEmpty()}">
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    You have no orders yet.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <nav aria-label="Order pagination"
+                     th:if="${orderHistoryList != null and !orderHistoryList.isEmpty() and totalPages > 0}"
+                     class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/profile/order-history(page=${currentPage - 1})}" aria-label="Previous">
+                                <span aria-hidden="true">Prev</span>
+                            </a>
+                        </li>
+
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/profile/order-history(page=${i})}" th:text="${i}"></a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/profile/order-history(page=${currentPage + 1})}" aria-label="Next">
+                                <span aria-hidden="true">Next</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center mt-4">
+                    <a href="/profile" class="text-decoration-none"
+                       style="color: var(--brand-primary); font-weight: 500;">
+                        <i class="fa-solid fa-arrow-left me-1"></i>
+                        Back to Profile
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

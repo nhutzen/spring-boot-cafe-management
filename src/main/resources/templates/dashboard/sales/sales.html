@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Sales Report',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/sales/sales.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<!-- Main Content -->
+<main class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold mb-0">Sales Report</h1>
+        <button id="exportButton" class="btn btn-outline-success"> <!-- btn-success is appropriate here -->
+            <i class="fas fa-file-excel me-2"></i>Export to Excel
+        </button>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-header py-3">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-filter me-2 text-muted"></i>Filter by Period</h5>
+        </div>
+        <div class="card-body p-4">
+            <div id="error-container" class="alert alert-danger d-none" role="alert"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Quick Select:</label>
+                <div class="btn-group w-100" role="group" aria-label="Quick date select">
+                    <button type="button" class="btn btn-outline-secondary" id="btn-today">Today</button>
+                    <button type="button" class="btn btn-outline-secondary" id="btn-this-week">This Week</button>
+                    <button type="button" class="btn btn-outline-secondary" id="btn-this-month">This Month</button>
+                </div>
+            </div>
+
+            <form th:action="@{/dashboard/sales}" method="post" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input required type="date" class="form-control" id="startDate" name="startDate">
+                </div>
+                <div class="col-md-5">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input required type="date" class="form-control" id="endDate" name="endDate">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-search me-1"></i> View
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div th:if="${salesSummary != null and salesSummary.totalOrders > 0}" class="row g-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-success h-100">
+                <div class="card-body text-success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Sales Amount</h6>
+                            <h4 class="card-title fw-bold"
+                                th:text="${'VND ' + #numbers.formatDecimal(salesSummary.totalRevenue, 0, 'COMMA', 0, 'POINT')}">
+                                VND 0
+                            </h4>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-3x text-success opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-primary h-100">
+                <div class="card-body text-primary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Total Orders</h6>
+                            <h4 class="card-title fw-bold" th:text="${salesSummary.totalOrders}">0</h4>
+                        </div>
+                        <i class="fas fa-receipt fa-3x text-primary opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-info h-100">
+                <div class="card-body text-info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Avg. Order Value</h6>
+                            <h4 class="card-title fw-bold"
+                                th:text="${'VND ' + #numbers.formatDecimal(salesSummary.averageOrderValue, 0, 'COMMA', 0, 'POINT')}">
+                                VND 0
+                            </h4>
+                        </div>
+                        <i class="fas fa-calculator fa-3x text-info opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-warning h-100">
+                <div class="card-body text-warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Vouchers Used</h6>
+                            <h4 class="card-title fw-bold" th:text="${salesSummary.vouchersUsed}">0</h4>
+                        </div>
+                        <i class="fas fa-ticket-alt fa-3x text-warning opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Transactions Table -->
+    <div th:if="${salesSummary != null and salesSummary.totalOrders > 0}" class="card mt-4">
+        <div class="card-header py-3">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-list-alt me-2 text-muted"></i>Detailed Transactions</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th class="p-3">Order ID</th>
+                        <th class="p-3">Date</th>
+                        <th class="p-3">Customer</th>
+                        <th class="p-3">Total Amount</th>
+                        <th class="p-3">Discount (Points)</th>
+                        <th class="p-3">Voucher</th>
+                        <th class="p-3">Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td class="p-3" th:text="${'#' + order.orderId}">#1001</td>
+                        <td class="p-3" th:text="${#temporals.format(order.createdAt, 'dd-MMM-yyyy HH:mm')}"></td>
+                        <td class="p-3" th:if="${order.customer == null}">Guest</td>
+                        <td class="p-3" th:unless="${order.customer == null}" th:text="${order.customer.name}"></td>
+                        <td class="p-3"
+                            th:text="${'VND ' + #numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')}">
+                            VND 250,000
+                        </td>
+                        <td class="p-3" th:text="${order.pointsUsed}">10</td>
+                        <td class-><span class="badge bg-secondary text-dark bg-opacity-10"
+                                         th:text="${order.voucher != null ? order.voucher.code : '-'}"></span></td>
+                        <td class="p-3">
+                                <span th:classappend="${order.status == 'paid' ? 'badge bg-success' : (order.status == 'pending' ? 'badge bg-warning' : 'badge bg-secondary')}"
+                                      th:text="${order.status}">Paid</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Data State -->
+    <div th:if="${salesSummary == null or salesSummary.totalOrders == 0}" class="card mt-4">
+        <div class="card-body text-center p-5">
+            <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No Data Available</h4>
+            <p class="mb-0 text-muted">There is no sales data for the selected period. Please select a different date
+                range.</p>
+        </div>
+    </div>
+</main>
+<div th:insert="~{layout/footer}"></div>
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const exportButton = document.getElementById('exportButton');
+        const errorContainer = document.getElementById('error-container');
+        const btnToday = document.getElementById('btn-today');
+        const btnThisWeek = document.getElementById('btn-this-week');
+        const btnThisMonth = document.getElementById('btn-this-month');
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        if (btnToday && startDateInput && endDateInput) {
+            btnToday.addEventListener('click', () => {
+                const today = new Date();
+                startDateInput.value = formatDate(today);
+                endDateInput.value = formatDate(today);
+            });
+        }
+
+        if (btnThisWeek && startDateInput && endDateInput) {
+            btnThisWeek.addEventListener('click', () => {
+                const today = new Date();
+                // Adjust to get the start of the week (assuming Sunday is the first day)
+                const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+
+                // Create a new date for the end of the week
+                const lastDayOfWeek = new Date(firstDayOfWeek);
+                lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6);
+
+                startDateInput.value = formatDate(firstDayOfWeek);
+                endDateInput.value = formatDate(lastDayOfWeek);
+            });
+        }
+
+        if (btnThisMonth && startDateInput && endDateInput) {
+            btnThisMonth.addEventListener('click', () => {
+                const today = new Date();
+                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+                startDateInput.value = formatDate(firstDayOfMonth);
+                endDateInput.value = formatDate(lastDayOfMonth);
+            });
+        }
+
+        const showError = (message) => {
+            if (errorContainer) {
+                errorContainer.textContent = message;
+                errorContainer.classList.remove('d-none');
+            } else {
+                console.error(message);
+            }
+        };
+
+        const hideError = () => {
+            if (errorContainer) {
+                errorContainer.classList.add('d-none'); // Hide error
+            }
+        };
+
+        if (exportButton) {
+            exportButton.addEventListener('click', function () {
+                if (!startDateInput || !endDateInput) {
+                    showError('Error: Date input fields not found.');
+                    return;
+                }
+
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+
+                hideError(); // Hide old errors
+
+                if (!startDate || !endDate) {
+                    showError('Please select a Start Date and End Date to export.');
+                    return;
+                }
+                if (new Date(startDate) > new Date(endDate)) {
+                    showError('Start Date cannot be after End Date.');
+                    return;
+                }
+
+                const exportUrl = `/dashboard/sales/export?startDate=${startDate}&endDate=${endDate}`;
+                window.location.href = exportUrl;
+            });
+        }
+
+        // Hide error on form submission attempt as well
+        const form = document.querySelector('form[th\\:action="@{/dashboard/sales}"]');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                if (!startDateInput || !endDateInput) {
+                    e.preventDefault();
+                    showError('Error: Date input fields not found.');
+                    return;
+                }
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+
+                if (new Date(startDate) > new Date(endDate)) {
+                    e.preventDefault();
+                    showError('Start Date cannot be after End Date.');
+                    return;
+                }
+
+                hideError();
+            });
+        }
+    });
+</script>
+</body>
+</html>

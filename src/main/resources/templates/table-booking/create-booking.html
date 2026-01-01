@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header class="container-fluid bg-dark text-white p-3" th:replace="layout/header :: tablebook"></header>
+<body>
+<div th:insert="~{layout/header::navbar-tablebook}"></div>
+
+<!-- Main Content -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+
+            <div class="card">
+
+                <div class="card-header bg-primary text-white text-center p-4">
+                    <h2 class="mb-0">Table Booking Form</h2>
+                    <h4 class="fw-light mt-2" th:text="'Table ID: '+ ${table.tableId}">Table ID: A1</h4>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" th:action="@{/table/booking/new}" th:object="${tableBooking}">
+                        <input th:field="*{table}" th:value="${table}" type="hidden"/>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="customerName">
+                                <i class="fas fa-user me-2"></i>Fullname
+                            </label>
+                            <input class="form-control" id="customerName" readonly th:field="*{customer.name}"
+                                   th:value="${loggedCustomer.name}" type="text">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="phoneNumber">
+                                <i class="fas fa-phone me-2"></i>Phone Number
+                            </label>
+                            <input class="form-control" id="phoneNumber" placeholder="Vd: 0987654321" readonly
+                                   th:field="*{customer.phoneNumber}" type="tel">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="bookingDate">Booking Date</label>
+                            <input class="form-control" id="bookingDate"
+                                   readonly
+                                   th:value="${#temporals.format(now, 'yyyy-MM-dd')}"
+                                   type="date">
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label class="form-label" for="bookingTime">Choose booking time</label>
+                            <input class="form-control" id="bookingTime"
+                                   required
+                                   type="time">
+                        </div>
+
+                        <input id="bookingDateTime" name="bookingTime" th:field="*{bookingTime}" type="hidden">
+
+
+                        <div class="mb-4">
+                            <label class="form-label" for="notes">
+                                <i class="fas fa-pencil-alt me-2"></i>Note (optional)
+                            </label>
+                            <textarea class="form-control" id="notes" placeholder="Vd: Cho tôi một ghế trẻ em..."
+                                      th:field="*{note}"
+                                      rows="3"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <!-- Nút .btn-primary sẽ tự động là MÀU CAM -->
+                            <button class="btn btn-outline-primary btn-lg" type="submit">Book</button>
+
+                            <!--
+                              THAY ĐỔI: btn-outline-secondary -> btn-outline-primary
+                              Để thống nhất với các nút phụ khác (viền cam)
+                            -->
+                            <a class="btn btn-outline-primary" th:href="@{/table/list}">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+<!-- Error Modal (Giữ nguyên) -->
+<div aria-hidden="true" aria-labelledby="errorModalLabel" class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--border-radius-lg);">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button aria-label="Close" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        type="button"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-danger mb-0" role="alert">
+                    <span th:text="${errorMessage}">Lỗi không xác định!</span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-danger" data-bs-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Success Modal (ĐÃ SỬA LỖI) -->
+<div aria-hidden="true" aria-labelledby="successModalLabel" class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--border-radius-lg);">
+            <!--
+              THAY ĐỔI: bg-danger -> bg-success
+            -->
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button aria-label="Close" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        type="button"></button>
+            </div>
+
+            <div class="modal-body">
+                <!--
+                  THAY ĐỔI: alert-danger -> alert-success
+                -->
+                <div class="alert alert-success mb-0" role="alert">
+                    <span th:text="${successMessage}">ok</span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <!--
+                  THAY ĐỔI: btn-danger -> btn-primary
+                  (Dùng nút màu cam chủ đạo)
+                -->
+                <button class="btn btn-primary" data-bs-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Giữ nguyên toàn bộ JavaScripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const hasError = /*[[${errorMessage != null}]]*/ false;
+        if (hasError) {
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+        }
+    });
+</script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const hasSuccess = /*[[${successMessage != null}]]*/ false;
+        if (hasSuccess) {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+        }
+    });
+</script>
+
+
+<script>
+    document.getElementById('bookingTime').addEventListener('change', function () {
+        const time = this.value; // ví dụ: "14:30"
+        const dateInput = document.getElementById('bookingDate').value; // Lấy ngày từ input readonly
+
+        // Nếu không có ngày, dùng ngày hôm nay (fallback)
+        const dateValue = dateInput ? dateInput : new Date().toISOString().split('T')[0];
+
+        // Ghép lại thành định dạng datetime-local hợp lệ
+        const dateTimeLocal = `${dateValue}T${time}`;
+
+        // Gán vào input hidden (để form gửi về server)
+        document.getElementById('bookingDateTime').value = dateTimeLocal;
+    });
+
+    // Cập nhật lại logic 1 chút:
+    // Lấy ngày từ input 'bookingDate' thay vì 'today'
+    // để đảm bảo ngày + giờ là chính xác
+</script>
+
+</body>
+</html>

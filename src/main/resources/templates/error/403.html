@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <title>403 - Access Denial</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        body { font-family: Arial, sans-serif; text-align:center; padding:60px; }
+        .card { display:inline-block; padding:30px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+        h1 { font-size:48px; margin:0; }
+        p { color:#666; }
+        a.btn { display:inline-block; margin-top:16px; padding:10px 18px; border-radius:6px; text-decoration:none; border:1px solid #1976d2; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>403</h1>
+    <h2>Access Denied</h2>
+    <p>Sorry <strong th:text="${username}">user</strong>, you are not allowed to access this page.</p>
+    <p th:text="${message}">.</p>
+    <a class="btn" th:href="@{/home}">Return homepage</a>
+    <a class="btn" th:href="@{/login}" style="margin-left:8px">Log in with other account</a>
+</div>
+</body>
+</html>

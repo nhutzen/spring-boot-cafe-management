@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Vouchers',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/vouchers/create.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<!-- Main Content -->
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="fw-bold">Create New Voucher</h1>
+                <a th:href="@{/dashboard/vouchers/list}" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Cancel
+                </a>
+            </div>
+
+            <!-- Message/Error -->
+            <div th:if="${message}" class="alert alert-danger" role="alert" th:text="${message}"></div>
+
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+
+                    <form method="post" th:action="@{/dashboard/vouchers/save}" th:object="${voucher}">
+                        <div class="row">
+                            <!-- Column 1 -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="voucherName">Voucher Name</label>
+                                    <input type="text" class="form-control" id="voucherName" th:field="*{voucherName}"
+                                           placeholder="E.g. Summer Sale 10%" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="code">Voucher Code</label>
+                                    <input type="text" class="form-control" id="code" th:field="*{code}"
+                                           placeholder="E.g. SUMMER10" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="quantity">Quantity</label>
+                                    <input type="number" class="form-control" id="quantity" placeholder="Enter quantity"
+                                           th:field="*{quantity}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="minOrderValue">Minimum Order Value</label>
+                                    <input type="number" class="form-control" id="minOrderValue"
+                                           placeholder="Enter minimum order value" th:field="*{minOrderValue}" required>
+                                </div>
+                            </div>
+
+                            <!-- Column 2 -->
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="startDate">Start Date</label>
+                                            <input type="date" class="form-control" id="startDate"
+                                                   th:field="*{startDate}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="endDate">End Date</label>
+                                            <input type="date" class="form-control" id="endDate" th:field="*{endDate}"
+                                                   required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="discountType">Discount Type</label>
+                                    <select class="form-select" id="discountType" th:field="*{discountType}">
+                                        <option value="percent">Percent (%)</option>
+                                        <option value="amount">Amount (VND)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="discountValue">Discount Value</label>
+                                    <input type="number" class="form-control" id="discountValue"
+                                           placeholder="Enter discount value" th:field="*{discountValue}" required>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="col-12 mt-4">
+                                <div class="d-flex justify-content-end gap-2">
+<!--                                    <a th:href="@{/dashboard/vouchers/list}"-->
+<!--                                       class="btn btn-outline-secondary">Cancel</a>-->
+                                    <button type="submit" class="btn btn-brand-primary">Save Voucher</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

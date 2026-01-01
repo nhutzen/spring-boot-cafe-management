@@ -1,0 +1,106 @@
+:root {
+    --brand-primary: #FF7A00;
+    --brand-white: #FFFFFF;
+    --brand-dark: #212529;
+    --brand-light-gray: #f4f7f6; /* Page background */
+    --brand-gray: #6c757d; /* Secondary text */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--brand-light-gray);
+    color: var(--brand-dark);
+}
+
+/* --- Navbar --- */
+.navbar {
+    background-color: var(--brand-white) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand-logo {
+    font-weight: 700;
+    color: var(--brand-primary) !important;
+}
+
+.navbar-brand-logo:hover {
+    color: #E66E00 !important; /* Darker orange */
+}
+
+.navbar .nav-link {
+    color: var(--brand-dark) !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-primary) !important;
+}
+
+/* --- Unified Button Style --- */
+.btn-brand-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem; /* 8px */
+    transition: all 0.2s ease-in-out;
+    text-decoration: none; /* For <a> tags */
+}
+
+.btn-brand-primary:hover {
+    background-color: #E66E00; /* Darker orange */
+    border-color: #E66E00;
+    color: var(--brand-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Table Card Styling --- */
+.table-card {
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--brand-white);
+    height: 100%; /* Make cards equal height */
+    border-bottom-width: 4px;
+    border-bottom-style: solid;
+}
+
+.table-card.status-available {
+    border-color: var(--bs-success);
+}
+
+.table-card.status-booked {
+    border-color: var(--bs-warning);
+}
+
+.table-card.status-occupied {
+    border-color: var(--bs-danger);
+}
+
+.table-card .card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.table-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Empty State Styling --- */
+.empty-state {
+    color: var(--brand-gray);
+    padding: 4rem 0;
+    background-color: var(--brand-white);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state i {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+}

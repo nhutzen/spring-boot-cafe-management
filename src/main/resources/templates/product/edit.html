@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common :: common-head(
+            pageTitle='Product',
+            pageSpecificCss=~{:: .page-css}
+          )}"></head>
+<th:block class="page-css">
+    <link rel="stylesheet" href="/assets/css/dashboard/product/edit.css">
+</th:block>
+<body>
+<div th:replace="~{fragments/common :: navbar-main}"></div>
+
+<!-- Main Content -->
+<div class="container my-5">
+
+    <!-- Empty State -->
+    <div th:if="${product == null}" class="alert alert-warning text-center" role="alert">
+        <h4 class="alert-heading">Product Not Found!</h4>
+        <p>Sorry, the product with this ID does not exist or has been deleted.</p>
+        <a th:href="@{/product/list}" class="btn btn-brand-primary">Back to Product List</a>
+    </div>
+
+    <!-- Main Form Content -->
+    <div th:unless="${product == null}" th:object="${product}">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <p>
+                    <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+                </p>
+                <!-- Header Card -->
+                <div class="card mb-4" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                    <div class="card-body p-3 p-md-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center">
+                            <h2 class="fw-bold mb-0" th:text="${title}">Edit Product</h2>
+                            <a th:href="@{/product/list}" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Back to Product List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Card -->
+                <div class="card shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <form th:action="@{/product/edit/{proId}(proId=*{proId})}" method="post"
+                              enctype="multipart/form-data">
+                            <input type="hidden" th:field="*{proId}"/>
+                            <input type="hidden" th:field="*{img}" id="imgField"/>
+                            <input type="hidden" th:field="*{proName}" sec:authorize="hasRole('ROLE_BARISTA')"/>
+                            <input type="hidden" th:field="*{price}" sec:authorize="hasRole('ROLE_BARISTA')"/>
+                            <input type="hidden" th:field="*{category}" sec:authorize="hasRole('ROLE_BARISTA')"/>
+                            <input type="hidden" th:field="*{description}" sec:authorize="hasRole('ROLE_BARISTA')"/>
+                            <input type="hidden" th:field="*{active}" sec:authorize="hasRole('ROLE_BARISTA')"/>
+                            <div class="row g-4">
+                                <!-- Column 1: Product Details -->
+                                <div class="col-lg-7">
+                                    <h5 class="fw-bold border-bottom pb-2 mb-3">Product Information</h5>
+
+                                    <div class="mb-3" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                        <label for="proName" class="form-label fw-bold">Name:</label>
+                                        <input type="text" id="proName" th:field="*{proName}" class="form-control"
+                                               required/>
+                                        <div th:if="${nameError}" class="alert alert-danger mt-2 p-2" role="alert">
+                                            <span th:text="${nameError}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                        <label for="price" class="form-label fw-bold">Price (VND):</label>
+                                        <input type="number" id="price" th:field="*{price}" min="1000"
+                                               class="form-control"/>
+                                        <div th:if="${priceError}" class="alert alert-danger mt-2 p-2" role="alert">
+                                            <span th:text="${priceError}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                        <label for="categorySelect" class="form-label fw-bold">Category:</label>
+                                        <select id="categorySelect" th:field="*{category}" class="form-select">
+                                            <option th:each="category : ${categoryList}"
+                                                    th:value="${category.cateId}"
+                                                    th:text="${category.cateName}">
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                        <label for="description" class="form-label fw-bold">Description:</label>
+                                        <textarea id="description" th:field="*{description}" class="form-control"
+                                                  rows="4"></textarea>
+                                        <div th:if="${descriptionError}" class="alert alert-danger mt-2 p-2"
+                                             role="alert">
+                                            <span th:text="${descriptionError}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="statusSelect" class="form-label fw-bold">Status:</label>
+                                            <select id="statusSelect" th:field="*{status}" class="form-select">
+                                                <option value="Available">Available</option>
+                                                <option value="Unavailable">Unavailable</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="quantity" class="form-label fw-bold">Quantity:</label>
+                                            <input type="number" id="quantity" th:field="*{quantity}" min="0"
+                                                   class="form-control"/>
+                                            <div th:if="${quantityError}" class="alert alert-danger mt-2 p-2" role="alert">
+                                                <span th:text="${quantityError}"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3 d-flex align-items-end"
+                                             sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                            <div class="form-check form-switch fs-5">
+
+                                                <input type="checkbox" id="activeCheckbox" th:field="*{active}"
+                                                       class="form-check-input" role="switch"/>
+                                                <label class="form-check-label" for="activeCheckbox">Active</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Column 2: Image Management -->
+                                <div class="col-lg-5">
+                                    <h5 class="fw-bold border-bottom pb-2 mb-3">Image Management</h5>
+
+                                    <div class-="mb-3">
+                                        <label class="form-label d-block">Current Image:</label>
+                                        <img th:src="@{/uploads/{img}(img=*{img})}"
+                                             th:onerror="|this.src='https://placehold.co/200x200/f4f7f6/6c757d?text=No+Img'|"
+                                             class="image-preview"
+                                             id="currentImage"/>
+                                    </div>
+
+                                    <div class="mb-3 mt-3"  sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                        <label for="fileInput" class="form-label fw-bold">Upload New Image:</label>
+                                        <input type="file" id="fileInput" name="file" accept="image/*"
+                                               class="form-control"/>
+                                        <small class="form-text text-muted">*Select a new file to replace the current
+                                            image.</small>
+                                    </div>
+
+                                    <div id="imagePreviewContainer" style="display: none; margin-top: 15px;"  sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                        <label class="form-label d-block fw-bold">New Image (Preview):</label>
+                                        <img id="imagePreview" src="#" alt="Image Preview" class="image-preview"/>
+                                    </div>
+
+                                    <div th:if="${fileError}" class="alert alert-warning mt-3 p-2">
+                                        <span th:text="${fileError}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-end mt-4 pt-4 border-top">
+                                <button type="reset" class="btn btn-outline-secondary me-2">Reset</button>
+                                <button type="submit" class="btn btn-outline-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{layout/footer}"></div>
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<!-- Image Preview JS -->
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const currentImage = document.getElementById('currentImage');
+
+    fileInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                // Show new image preview
+                imagePreview.src = e.target.result;
+                imagePreviewContainer.style.display = 'block';
+                currentImage.style.display = 'none'; // Hide old image
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            // If no file is selected, hide preview and show old image
+            imagePreviewContainer.style.display = 'none';
+            currentImage.style.display = 'block';
+            imagePreview.src = "#";
+        }
+    });
+
+    // Reset button logic
+    const form = document.querySelector('form');
+    form.addEventListener('reset', function () {
+        // When form resets, hide preview and show current image
+        imagePreviewContainer.style.display = 'none';
+        currentImage.style.display = 'block';
+        imagePreview.src = "#";
+        fileInput.value = null; // Clear file input
+    });
+</script>
+
+</body>
+</html>

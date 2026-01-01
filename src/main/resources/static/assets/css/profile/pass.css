@@ -1,0 +1,113 @@
+/* == :root định nghĩa các biến màu chủ đạo == */
+:root {
+    --color-primary: #FF7A00; /* Cam chủ đạo */
+    --color-primary-dark: #E06C00; /* Cam đậm hơn khi hover */
+    --color-white: #FFFFFF;
+    --color-background: #f8f9fa; /* Một màu xám rất nhạt cho nền */
+    --color-text-dark: #212529; /* Màu text chính */
+    --color-text-muted: #6c757d; /* Màu text phụ */
+    --font-family-base: 'Inter', sans-serif;
+    --border-radius-base: 0.5rem; /* 8px - bo góc thống nhất */
+    --border-radius-lg: 0.75rem; /* 12px */
+    --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* == Style tổng thể == */
+body {
+    font-family: var(--font-family-base);
+    background-color: var(--color-background);
+    color: var(--color-text-dark);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* == Style cho Card (Thống nhất) == */
+.card {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-base);
+    height: 100%;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* == STYLES CHO BUTTON (Thống nhất) == */
+/* 1. Button chính (Màu cam) */
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--border-radius-base);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: var(--color-white);
+    box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+}
+
+/* 2. Button phụ (Viền cam) */
+.btn-outline-primary {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--border-radius-base);
+    border-width: 2px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 10px rgba(255, 122, 0, 0.25);
+}
+
+/* Ghi đè màu warning (Nếu có) */
+.btn-warning {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white) !important;
+}
+
+.btn-warning:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+/* == Style riêng cho Form (Thống nhất) == */
+.form-label {
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.form-control, .form-select {
+    border-radius: var(--border-radius-base);
+    padding: 0.65rem 1rem;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+}
+
+.form-control[readonly] {
+    background-color: var(--color-background);
+    border: none;
+    padding-left: 0;
+}
